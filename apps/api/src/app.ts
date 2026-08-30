@@ -22,6 +22,7 @@ import { registerStripeIdentityWebhook } from "./identity/webhook.js";
 import { registerProvisionRoutes } from "./auth/provision-routes.js";
 import { createRateLimitMiddleware } from "./security/rate-limit.js";
 import { registerSupportRoutes, type SupportResponder } from "./support/routes.js";
+import { registerSettingsRoutes } from "./settings/routes.js";
 
 type AppDependencies = {
   auth: AuthProvider;
@@ -82,6 +83,7 @@ export const createApp = (config: AppConfig, dependencies?: AppDependencies, mar
         users: dependencies.users,
         pool: dependencies.ledgerPool
       });
+      registerSettingsRoutes(app, { auth: dependencies.auth, users: dependencies.users, pool: dependencies.ledgerPool });
       registerActivityRoutes(app, {
         auth: dependencies.auth,
         users: dependencies.users,

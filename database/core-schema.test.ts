@@ -95,6 +95,15 @@ describe("Phoenix core schema", () => {
     ]);
   });
 
+  it("defaults every account display currency to EUR", async () => {
+    const result = await database.query<{ display_currency: string }>(
+      "SELECT display_currency FROM users WHERE user_id = $1",
+      [legacyUserId]
+    );
+
+    expect(result.rows).toEqual([{ display_currency: "EUR" }]);
+  });
+
   it("rejects a ledger transaction without balancing entries", async () => {
     await database.query("BEGIN");
     try {

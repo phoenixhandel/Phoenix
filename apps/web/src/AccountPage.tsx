@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { CompanyLogo } from "./CompanyLogo";
+import { getAuthClient } from "./auth-client";
 import { useLanguage } from "./i18n";
+import { passwordIssue } from "./password-policy";
 import { WorkspaceShell } from "./WorkspaceShell";
 
 const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -163,6 +165,12 @@ export const AccountPage = ({ page }: { page: Page }) => {
     "loading" | "ready" | "unavailable"
   >("loading");
   const [walletNotice, setWalletNotice] = useState<string | null>(null);
+  const [displayCurrency, setDisplayCurrency] = useState<"EUR" | "USD" | "GBP">("EUR");
+  const [newPassword, setNewPassword] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [supportSubject, setSupportSubject] = useState("");
+  const [supportMessage, setSupportMessage] = useState("");
+  const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
   const token = window.localStorage.getItem("phoenix_access_token");
   const route =
     page in endpoints ? endpoints[page as keyof typeof endpoints] : null;
@@ -205,6 +213,7 @@ export const AccountPage = ({ page }: { page: Page }) => {
   const trades = (data as TradeResponse | null)?.trades;
   const events = (data as ActivityResponse | null)?.events;
   const balanceRows = Object.entries(balances ?? {});
+  const fiat = new Intl.NumberFormat(language === "de" ? "de-DE" : "en-GB", { style: "currency", currency: displayCurrency, maximumFractionDigits: 2 });
   const isReady = requestState === "ready";
   const isUnavailable = requestState === "unavailable";
   const detailTitle =
@@ -267,9 +276,7 @@ export const AccountPage = ({ page }: { page: Page }) => {
                     </p>
                   </div>
                 </div>
-                <p className="font-mono text-sm tabular-nums text-slate-200">
-                  {value}
-                </p>
+                <div className="text-right"><p className="font-mono text-sm font-semibold tabular-nums text-white">{fiat.format(0)}</p><p className="mt-1 font-mono text-xs tabular-nums text-slate-500">{value} {asset}</p></div>
               </div>
             ))}
           </div>
@@ -468,28 +475,13 @@ export const AccountPage = ({ page }: { page: Page }) => {
     </section>
   );
   const settings = (
-    <section className="divide-y divide-[#1e2a40] border border-[#1e2a40] bg-[#0d1727]">
-      <a
-        href="/account/verification"
-        className="block p-5 transition hover:bg-[#101d30]"
-      >
-        <h2 className="text-lg font-semibold text-white">
-          {copy.verification}
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-400">
-          {copy.verificationCopy}
-        </p>
-      </a>
-      <a
-        href="/reset-password"
-        className="block p-5 transition hover:bg-[#101d30]"
-      >
-        <h2 className="text-lg font-semibold text-white">{copy.security}</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-400">
-          {copy.securityCopy}
-        </p>
-      </a>
-    </section>
+    <div className="grid gap-5 xl:grid-cols-2">
+      <section className="border border-[#1e2a40] bg-[#0d1727] p-5"><h2 className="text-lg font-semibold text-white">{language === "de" ? "Anzeige" : "Display"}</h2><label className="mt-5 block text-sm text-slate-300">{language === "de" ? "Anzeigewährung" : "Display currency"}<select aria-label={language === "de" ? "Anzeigewährung" : "Display currency"} value={displayCurrency} onChange={(event) => { const next = event.target.value as "EUR" | "USD" | "GBP"; setDisplayCurrency(next); if (token) void fetch(`${apiBase}/api/me/settings`, { method: "PATCH", headers: { "content-type": "application/json", authorization: `Bearer ${token}` }, body: JSON.stringify({ displayCurrency: next }) }); }} className="mt-2 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none focus:border-cyan-300"><option value="EUR">Euro (EUR)</option><option value="USD">US Dollar (USD)</option><option value="GBP">British Pound (GBP)</option></select></label><p className="mt-3 text-sm leading-6 text-slate-400">{language === "de" ? "Portfolio-Werte werden in dieser Währung angezeigt. Die Asset-Menge bleibt immer sichtbar." : "Portfolio values use this currency while exact asset quantities remain visible."}</p></section>
+      <section className="border border-[#1e2a40] bg-[#0d1727] p-5"><h2 className="text-lg font-semibold text-white">{language === "de" ? "Passwort ändern" : "Change password"}</h2><form onSubmit={(event) => { event.preventDefault(); const issue = passwordIssue(newPassword, language); if (issue) { setSettingsNotice(issue); return; } const auth = getAuthClient(); if (!auth) { setSettingsNotice(copy.unavailable); return; } void auth.auth.updateUser({ password: newPassword }).then(({ error }) => setSettingsNotice(error?.message ?? (language === "de" ? "Passwort aktualisiert." : "Password updated."))); }}><label className="mt-5 block text-sm text-slate-300">{language === "de" ? "Neues Passwort" : "New password"}<input aria-label={language === "de" ? "Neues Passwort" : "New password"} type="password" autoComplete="new-password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} className="mt-2 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none focus:border-cyan-300" /></label><p className="mt-2 text-xs text-slate-500">{language === "de" ? "Mindestens 12 Zeichen, Groß-/Kleinbuchstabe, Zahl und Sonderzeichen." : "At least 12 characters with uppercase, lowercase, number, and symbol."}</p><button className="mt-4 min-h-10 bg-cyan-300 px-4 text-sm font-bold text-[#07101e] hover:bg-cyan-200">{language === "de" ? "Passwort speichern" : "Save password"}</button></form></section>
+      <section className="border border-[#1e2a40] bg-[#0d1727] p-5"><h2 className="text-lg font-semibold text-white">{language === "de" ? "E-Mail-Adresse ändern" : "Change email address"}</h2><form onSubmit={(event) => { event.preventDefault(); const auth = getAuthClient(); if (!auth) { setSettingsNotice(copy.unavailable); return; } void auth.auth.updateUser({ email: newEmail }).then(({ error }) => setSettingsNotice(error?.message ?? (language === "de" ? "Bitte bestätigen Sie die Änderung über die E-Mail-Nachricht." : "Confirm the change using the email message."))); }}><label className="mt-5 block text-sm text-slate-300">{language === "de" ? "Neue E-Mail-Adresse" : "New email address"}<input aria-label={language === "de" ? "Neue E-Mail-Adresse" : "New email address"} required type="email" autoComplete="email" value={newEmail} onChange={(event) => setNewEmail(event.target.value)} className="mt-2 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none focus:border-cyan-300" /></label><button className="mt-4 min-h-10 border border-cyan-300/60 px-4 text-sm font-semibold text-cyan-100 hover:bg-cyan-300 hover:text-[#07101e]">{language === "de" ? "Änderung anfordern" : "Request change"}</button></form></section>
+      <section className="border border-[#1e2a40] bg-[#0d1727] p-5"><h2 className="text-lg font-semibold text-white">{language === "de" ? "Kontakt aufnehmen" : "Contact us"}</h2><form onSubmit={(event) => { event.preventDefault(); if (!token) { setSettingsNotice(copy.unavailable); return; } void fetch(`${apiBase}/api/me/support-requests`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token}` }, body: JSON.stringify({ subject: supportSubject, message: supportMessage }) }).then((response) => setSettingsNotice(response.ok ? (language === "de" ? "Ihre Anfrage wurde gesendet." : "Your request was sent.") : (language === "de" ? "Die Anfrage konnte nicht gesendet werden." : "Your request could not be sent."))); }}><label className="mt-5 block text-sm text-slate-300">{language === "de" ? "Betreff" : "Subject"}<input aria-label={language === "de" ? "Betreff" : "Subject"} required value={supportSubject} onChange={(event) => setSupportSubject(event.target.value)} className="mt-2 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none focus:border-cyan-300" /></label><label className="mt-4 block text-sm text-slate-300">{language === "de" ? "Nachricht" : "Message"}<textarea aria-label={language === "de" ? "Nachricht" : "Message"} required value={supportMessage} onChange={(event) => setSupportMessage(event.target.value)} className="mt-2 min-h-28 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none focus:border-cyan-300" /></label><button className="mt-4 min-h-10 bg-cyan-300 px-4 text-sm font-bold text-[#07101e] hover:bg-cyan-200">{language === "de" ? "Anfrage senden" : "Send request"}</button></form></section>
+      {settingsNotice ? <p role="status" className="xl:col-span-2 border-l-2 border-cyan-300 bg-cyan-300/5 px-4 py-3 text-sm text-cyan-100">{settingsNotice}</p> : null}
+    </div>
   );
   const identity = (
     <section className="border border-[#1e2a40] bg-[#0d1727] px-5 py-6">

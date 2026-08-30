@@ -54,4 +54,12 @@ describe("AccountPage", () => {
     ).toBeTruthy();
     expect(screen.queryByText("Portfolio wird geladen…")).toBeNull();
   });
+
+  it("offers account currency, password, email, and contact controls in settings", () => {
+    render(<LanguageProvider><AccountPage page="settings" /></LanguageProvider>);
+    expect((screen.getByLabelText("Anzeigewährung") as HTMLSelectElement).value).toBe("EUR");
+    expect(screen.getByLabelText("Neues Passwort")).toBeTruthy();
+    expect(screen.getByLabelText("Neue E-Mail-Adresse")).toBeTruthy();
+    expect(screen.getByLabelText("Betreff")).toBeTruthy();
+  });
 });
