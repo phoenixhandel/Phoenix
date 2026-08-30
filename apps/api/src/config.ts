@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+const optionalNonEmptyString = z.preprocess(
+  (value) => value === "" ? undefined : value,
+  z.string().min(1).optional()
+);
+
 const configSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65_535).default(3001),
   DATABASE_URL: z.url().default("postgresql://phoenix:phoenix@localhost:5432/phoenix"),
@@ -10,7 +15,7 @@ const configSchema = z.object({
   SUPABASE_ANON_KEY: z.string().min(1).optional(),
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
-  OPENAI_API_KEY: z.string().min(1).optional(),
+  OPENAI_API_KEY: optionalNonEmptyString,
   OPENAI_SUPPORT_MODEL: z.string().min(1).default("gpt-5.6")
 }).refine((value) => Boolean(value.SUPABASE_URL) === Boolean(value.SUPABASE_ANON_KEY), {
   message: "SUPABASE_URL and SUPABASE_ANON_KEY must be set together"
