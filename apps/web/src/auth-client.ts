@@ -15,13 +15,19 @@ export const getAuthClient = () => {
   return client;
 };
 
-export const provisionApplicationUser = async () => {
+export const getAccessToken = async () => {
   const auth = getAuthClient();
   const session = auth ? (await auth.auth.getSession()).data.session : null;
-  if (!session) return;
+  if (session?.access_token) window.localStorage.setItem("phoenix_access_token", session.access_token);
+  return session?.access_token ?? null;
+};
+
+export const provisionApplicationUser = async () => {
+  const token = await getAccessToken();
+  if (!token) return;
   const response = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ""}/api/auth/provision`, {
     method: "POST",
-    headers: { authorization: `Bearer ${session.access_token}` }
+    headers: { authorization: `Bearer ${token}` }
   });
   if (!response.ok) throw new Error("ACCOUNT_PROVISIONING_FAILED");
 };

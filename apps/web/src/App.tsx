@@ -16,7 +16,7 @@ import { VerificationPage } from "./VerificationPage";
 import { InformationPage } from "./InformationPage";
 import { MarketsPage } from "./MarketsPage";
 import { LanguageProvider } from "./i18n";
-import { RequireVerifiedSession } from "./app-shell";
+import { AuthSessionProvider, PublicOnlyRoute, RequireVerifiedSession } from "./auth-session";
 import {
   BrowserRouter,
   Navigate,
@@ -724,12 +724,13 @@ const guarded = (element: React.ReactNode) => (
 export const App = () => (
   <LanguageProvider>
     <BrowserRouter>
+      <AuthSessionProvider>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<AuthPage mode="login" />} />
-        <Route path="/register" element={<AuthPage mode="register" />} />
-        <Route path="/forgot-password" element={<AuthPage mode="reset" />} />
-        <Route path="/reset-password" element={<AuthPage mode="reset" />} />
+        <Route path="/" element={<PublicOnlyRoute><LandingPage /></PublicOnlyRoute>} />
+        <Route path="/login" element={<PublicOnlyRoute><AuthPage mode="login" /></PublicOnlyRoute>} />
+        <Route path="/register" element={<PublicOnlyRoute><AuthPage mode="register" /></PublicOnlyRoute>} />
+        <Route path="/forgot-password" element={<PublicOnlyRoute><AuthPage mode="reset" /></PublicOnlyRoute>} />
+        <Route path="/reset-password" element={<PublicOnlyRoute><AuthPage mode="reset" /></PublicOnlyRoute>} />
         <Route path="/auth/callback" element={<AuthCallbackPage />} />
         <Route
           path="/verify-email"
@@ -818,6 +819,7 @@ export const App = () => (
         <Route path="*" element={guarded(<LandingPage />)} />
       </Routes>
       <SupportChatWidget />
+      </AuthSessionProvider>
     </BrowserRouter>
   </LanguageProvider>
 );

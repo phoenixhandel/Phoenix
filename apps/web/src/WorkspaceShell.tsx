@@ -65,7 +65,7 @@ export const WorkspaceShell = ({
     <main className="phoenix-shell min-h-screen text-slate-100 selection:bg-cyan-300/30">
       <header className="sticky top-0 z-20 border-b border-[#1e2a40] bg-[#091321]/95 backdrop-blur-xl">
         <div className="mx-auto flex min-h-16 max-w-[1480px] items-center gap-4 px-5 sm:px-8">
-          <PhoenixMark />
+          <PhoenixMark href="/account" />
           <nav
             aria-label="Workspace navigation"
             className="hidden items-center gap-1 md:flex"
