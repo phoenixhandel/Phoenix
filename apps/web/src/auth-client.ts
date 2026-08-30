@@ -19,5 +19,9 @@ export const provisionApplicationUser = async () => {
   const auth = getAuthClient();
   const session = auth ? (await auth.auth.getSession()).data.session : null;
   if (!session) return;
-  await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ""}/api/auth/provision`, { method: "POST", headers: { authorization: `Bearer ${session.access_token}` } });
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL ?? ""}/api/auth/provision`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${session.access_token}` }
+  });
+  if (!response.ok) throw new Error("ACCOUNT_PROVISIONING_FAILED");
 };

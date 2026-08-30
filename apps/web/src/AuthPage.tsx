@@ -19,6 +19,13 @@ const copy = {
     email: "E-Mail-Adresse",
     password: "Passwort",
     confirm: "Passwort wiederholen",
+    passwordRequirements: [
+      "Mindestens 12 Zeichen",
+      "Kleinbuchstabe",
+      "Großbuchstabe",
+      "Zahl",
+      "Sonderzeichen"
+    ],
     terms: "Ich akzeptiere die",
     termsLink: "Nutzungsbedingungen",
     create: "Konto erstellen",
@@ -28,6 +35,10 @@ const copy = {
     apple: "Mit Apple fortfahren",
     registered:
       "Prüfen Sie Ihr Postfach. Bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden.",
+    existingAccount:
+      "Für diese E-Mail-Adresse besteht bereits ein Konto. Bitte melden Sie sich an oder setzen Sie Ihr Passwort zurück.",
+    provisionFailed:
+      "Ihr Konto konnte nicht vorbereitet werden. Bitte versuchen Sie es erneut.",
     resetSent:
       "Wenn ein Konto existiert, wurde ein Link zum Zurücksetzen versendet.",
     unconfigured:
@@ -73,6 +84,13 @@ const copy = {
     email: "Email address",
     password: "Password",
     confirm: "Confirm password",
+    passwordRequirements: [
+      "At least 12 characters",
+      "Lowercase letter",
+      "Uppercase letter",
+      "Number",
+      "Special character"
+    ],
     terms: "I accept the",
     termsLink: "Terms of Use",
     create: "Create account",
@@ -82,6 +100,10 @@ const copy = {
     apple: "Continue with Apple",
     registered:
       "Check your inbox. Confirm your email address before signing in.",
+    existingAccount:
+      "An account already exists for this email address. Sign in or reset your password.",
+    provisionFailed:
+      "Your account could not be prepared. Please try again.",
     resetSent: "If an account exists, a password reset link has been sent.",
     unconfigured: "Authentication is not configured in this environment yet.",
     googleUnavailable:
@@ -135,6 +157,13 @@ export const AuthPage = ({
   const [emailSendAvailableAt, setEmailSendAvailableAt] = useState(0);
   const [clock, setClock] = useState(() => Date.now());
   const cooldownSeconds = otpCooldownSeconds(emailSendAvailableAt, clock);
+  const passwordRequirements = [
+    password.length >= 12,
+    /[a-z]/.test(password),
+    /[A-Z]/.test(password),
+    /\d/.test(password),
+    /[^A-Za-z0-9]/.test(password)
+  ];
 
   useEffect(() => {
     if (!cooldownSeconds) return;
@@ -201,6 +230,10 @@ export const AuthPage = ({
         setMessage(result.error.message);
         return;
       }
+      if (Array.isArray(result.data.user?.identities) && result.data.user.identities.length === 0) {
+        setMessage(text.existingAccount);
+        return;
+      }
       setVerificationEmail(email);
       setEmailSendAvailableAt(nextOtpSendAt());
       setMessage(null);
@@ -216,7 +249,12 @@ export const AuthPage = ({
       setMessage(text.verify);
       return;
     }
-    await provisionApplicationUser();
+    try {
+      await provisionApplicationUser();
+    } catch {
+      setMessage(text.provisionFailed);
+      return;
+    }
     window.location.assign("/account");
   };
   const oauth = async (provider: "google" | "apple") => {
@@ -255,8 +293,13 @@ export const AuthPage = ({
       setMessage(error.message);
       return;
     }
+    try {
+      await provisionApplicationUser();
+    } catch {
+      setMessage(text.provisionFailed);
+      return;
+    }
     setMessage(text.verified);
-    await provisionApplicationUser();
     window.location.assign("/verify-identity");
   };
   const resendCode = async () => {
@@ -432,11 +475,22 @@ export const AuthPage = ({
                   className="mt-1.5 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none transition focus:border-cyan-300"
                 />
                 {mode === "register" ? (
-                  <span className="mt-2 block text-xs leading-5 text-slate-500">
-                    {language === "de"
-                      ? "Mindestens 12 Zeichen · Kleinbuchstabe · Großbuchstabe · Zahl · Sonderzeichen"
-                      : "At least 12 characters · lowercase · uppercase · number · special character"}
-                  </span>
+                  <ul className="mt-3 grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
+                    {text.passwordRequirements.map((requirement, index) => (
+                      <li key={requirement} className={passwordRequirements[index] ? "text-emerald-200" : "text-slate-500"}>
+                        <label className="flex items-center gap-2">
+                          <input
+                            aria-label={requirement}
+                            checked={passwordRequirements[index]}
+                            readOnly
+                            type="checkbox"
+                            className="h-3.5 w-3.5 accent-emerald-300"
+                          />
+                          {requirement}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
                 ) : null}
               </label>
                 {mode === "register" ? (
