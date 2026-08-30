@@ -1,0 +1,19 @@
+{
+	email {$CADDY_EMAIL}
+	admin off
+}
+
+phoenixhandel.com {
+	encode zstd gzip
+
+	@api path /api/*
+	handle @api {
+		reverse_proxy api:3001
+	}
+
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+	}
+}

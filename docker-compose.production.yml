@@ -1,0 +1,66 @@
+name: phoenix
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: phoenix
+      POSTGRES_USER: phoenix
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
+    volumes:
+      - phoenix-postgres:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phoenix -d phoenix"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  api:
+    build:
+      context: .
+      target: api
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://phoenix:${POSTGRES_PASSWORD}@postgres:5432/phoenix
+      CORS_ORIGIN: https://phoenixhandel.com
+      MARKET_PROVIDER: binance
+      REQUIRE_KYC_FOR_TRADING: "false"
+      SUPABASE_URL: ${SUPABASE_URL:?Set SUPABASE_URL in .env.production}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:?Set SUPABASE_ANON_KEY in .env.production}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_SUPPORT_MODEL: ${OPENAI_SUPPORT_MODEL:-gpt-5.6}
+    expose:
+      - "3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      target: web
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:?Set VITE_SUPABASE_URL in .env.production}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY:?Set VITE_SUPABASE_ANON_KEY in .env.production}
+        VITE_API_BASE_URL: ""
+        VITE_LOGO_DEV_PUBLISHABLE_KEY: ${VITE_LOGO_DEV_PUBLISHABLE_KEY:-}
+    restart: unless-stopped
+    environment:
+      CADDY_EMAIL: ${CADDY_EMAIL:?Set CADDY_EMAIL in .env.production}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  phoenix-postgres:
+  caddy-data:
+  caddy-config:
