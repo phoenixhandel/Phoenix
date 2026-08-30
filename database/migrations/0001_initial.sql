@@ -1,0 +1,1 @@
+-- Phase 1 baseline. Financial schema migrations begin in Phase 2.

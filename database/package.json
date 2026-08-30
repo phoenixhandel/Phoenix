@@ -1,0 +1,18 @@
+{
+  "name": "@phoenix/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "tsx migrate.ts",
+    "seed": "tsx seeds/dev.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "pg": "^8.16.3",
+    "zod": "^4.1.5"
+  }
+}

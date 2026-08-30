@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: phoenix-api
+    runtime: node
+    region: frankfurt
+    plan: 0.5c-512mb
+    buildCommand: npm ci && npm run build --workspace @phoenix/shared && npm run build --workspace @phoenix/database && npm run build --workspace @phoenix/api
+    preDeployCommand: npm run db:migrate
+    startCommand: node apps/api/dist/server.js
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    domains:
+      - api.phoenixhandel.com
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: phoenix-db
+          property: connectionString
+      - key: CORS_ORIGIN
+        sync: false
+      - key: MARKET_PROVIDER
+        value: binance
+      - key: REQUIRE_KYC_FOR_TRADING
+        value: "false"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_SUPPORT_MODEL
+        value: gpt-5.6
+
+  - type: web
+    name: phoenix-web
+    runtime: static
+    buildCommand: npm ci && npm run build --workspace @phoenix/shared && npm run build --workspace @phoenix/web
+    staticPublishPath: apps/web/dist
+    autoDeployTrigger: commit
+    domains:
+      - phoenixhandel.com
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_LOGO_DEV_PUBLISHABLE_KEY
+        sync: false
+
+databases:
+  - name: phoenix-db
+    region: frankfurt
+    plan: 0.1c-256mb
+    postgresMajorVersion: "18"

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-24T07:45:00.000Z",
+  "title": "Design System: Phoenix Exchange",
+  "extensions": {
+    "colorMeta": {
+      "app-bg": { "role": "neutral", "displayName": "Midnight Canvas", "canonical": "#07101e", "tonalRamp": ["#07101e", "#091321", "#0a1322", "#0d1727", "#172337", "#1e2a40", "#2a3a54", "#f1f5f9"] },
+      "cyan": { "role": "primary", "displayName": "Signal Cyan", "canonical": "oklch(86.5% .127 207.078)", "tonalRamp": ["#155e75", "#0e7490", "#0891b2", "#06b6d4", "#22d3ee", "#67e8f9", "oklch(91.7% .08 205.041)", "#ecfeff"] },
+      "cyan-hover": { "role": "primary", "displayName": "Cyan Hover", "canonical": "oklch(91.7% .08 205.041)", "tonalRamp": ["#155e75", "#0e7490", "#0891b2", "#06b6d4", "#22d3ee", "#67e8f9", "oklch(91.7% .08 205.041)", "#ecfeff"] },
+      "text-control": { "role": "neutral", "displayName": "Cool White Control", "canonical": "#e2e8f0", "tonalRamp": ["#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1", "#e2e8f0"] },
+      "buy": { "role": "secondary", "displayName": "Buy Green", "canonical": "oklch(84.5% .143 164.978)", "tonalRamp": ["#064e3b", "#047857", "#059669", "#10b981", "#34d399", "oklch(84.5% .143 164.978)", "oklch(90.5% .093 164.15)", "#ecfdf5"] },
+      "sell": { "role": "secondary", "displayName": "Sell Rose", "canonical": "oklch(81% .117 11.638)", "tonalRamp": ["#4c0519", "#881337", "#be123c", "#e11d48", "#fb7185", "oklch(81% .117 11.638)", "oklch(89.2% .058 10.001)", "#fff1f2"] },
+      "simulated": { "role": "tertiary", "displayName": "Simulation Amber", "canonical": "oklch(92.4% .12 95.746)", "tonalRamp": ["#78350f", "#a16207", "#ca8a04", "#eab308", "#facc15", "oklch(87.9% .169 91.605)", "oklch(92.4% .12 95.746)", "#fffbeb"] }
+    },
+    "typographyMeta": {
+      "body": { "displayName": "Interface Sans", "purpose": "Navigation, labels, controls, and explanatory copy." },
+      "market-data": { "displayName": "Market Data Mono", "purpose": "Prices, quantities, times, and currency values that must scan in columns." },
+      "label": { "displayName": "Compressed Label", "purpose": "Uppercase metadata, table headers, and persistent status labels." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "control-transition", "value": "CSS transition (property defaults from Tailwind)", "purpose": "Small color and border changes on buttons, links, and tabs; no positional lift." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Buy Action",
+      "kind": "button",
+      "refersTo": "buy-action",
+      "description": "The full-width, semantic submit action for a simulated buy order.",
+      "html": "<button class=\"ds-buy\">Buy BTC</button>",
+      "css": ".ds-buy { width: 100%; border: 0; border-radius: 0; padding: 12px; background: oklch(84.5% .143 164.978); color: #06131a; font: 700 14px Aptos, 'Segoe UI Variable', sans-serif; cursor: pointer; transition: background-color .15s; } .ds-buy:hover { background: oklch(90.5% .093 164.15); } .ds-buy:focus-visible { outline: 2px solid oklch(86.5% .127 207.078); outline-offset: 2px; }"
+    },
+    {
+      "name": "Sell Action",
+      "kind": "button",
+      "refersTo": "sell-action",
+      "description": "The full-width, semantic submit action for a simulated sell order.",
+      "html": "<button class=\"ds-sell\">Sell BTC</button>",
+      "css": ".ds-sell { width: 100%; border: 0; border-radius: 0; padding: 12px; background: oklch(81% .117 11.638); color: #280b12; font: 700 14px Aptos, 'Segoe UI Variable', sans-serif; cursor: pointer; transition: background-color .15s; } .ds-sell:hover { background: oklch(89.2% .058 10.001); } .ds-sell:focus-visible { outline: 2px solid oklch(86.5% .127 207.078); outline-offset: 2px; }"
+    },
+    {
+      "name": "Amount Field",
+      "kind": "input",
+      "refersTo": "order-input",
+      "description": "A square, monospaced amount field with an immovable asset suffix.",
+      "html": "<label class=\"ds-field\">Amount <span class=\"ds-input-wrap\"><input aria-label=\"BTC amount\" value=\"0.10\" /><b>BTC</b></span></label>",
+      "css": ".ds-field { display: grid; gap: 4px; color: oklch(70.4% .04 256.788); font: 12px Aptos, 'Segoe UI Variable', sans-serif; } .ds-input-wrap { display: flex; border: 1px solid #2a3a54; background: #0a1322; } .ds-input-wrap:focus-within { border-color: oklch(86.5% .127 207.078); } .ds-input-wrap input { min-width: 0; flex: 1; border: 0; outline: 0; background: transparent; padding: 12px; color: #f1f5f9; font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; } .ds-input-wrap b { padding: 12px; color: oklch(55.4% .046 257.417); font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; }"
+    },
+    {
+      "name": "Interval Tab",
+      "kind": "button",
+      "refersTo": "tab-active",
+      "description": "A compact chart-period selector whose selected state is tonal and cyan.",
+      "html": "<div class=\"ds-tabs\"><button>15m</button><button class=\"is-active\">1h</button><button>4h</button></div>",
+      "css": ".ds-tabs { display: flex; gap: 4px; background: #0d1727; } .ds-tabs button { border: 0; border-radius: 0; padding: 4px 8px; background: transparent; color: oklch(55.4% .046 257.417); font: 12px Aptos, 'Segoe UI Variable', sans-serif; cursor: pointer; } .ds-tabs button:hover { color: oklch(86.9% .022 252.894); } .ds-tabs .is-active { background: #1d3046; color: oklch(91.7% .08 205.041); } .ds-tabs button:focus-visible { outline: 2px solid oklch(86.5% .127 207.078); outline-offset: 2px; }"
+    },
+    {
+      "name": "Trading Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "The square, bordered module used for market data, charts, order flow, and portfolio context.",
+      "html": "<section class=\"ds-panel\"><h3>Order book</h3><p>64,280.10 <span>USDT</span></p></section>",
+      "css": ".ds-panel { border: 1px solid #1e2a40; border-radius: 0; background: #0d1727; padding: 16px; color: #f1f5f9; font-family: Aptos, 'Segoe UI Variable', sans-serif; } .ds-panel h3 { margin: 0 0 12px; font-size: 14px; } .ds-panel p { margin: 0; color: oklch(84.5% .143 164.978); font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; font-variant-numeric: tabular-nums; } .ds-panel span { color: oklch(55.4% .046 257.417); font-size: 10px; }"
+    },
+    {
+      "name": "Simulation Disclosure",
+      "kind": "chip",
+      "refersTo": "simulated-disclosure",
+      "description": "Persistent safety status that signals the exchange is a simulation, not a custody or execution surface.",
+      "html": "<span class=\"ds-simulated\">SIMULATED TRADING</span>",
+      "css": ".ds-simulated { display: inline-block; border: 1px solid color-mix(in oklab, oklch(87.9% .169 91.605) 30%, transparent); border-radius: 0; background: color-mix(in oklab, oklch(87.9% .169 91.605) 10%, transparent); padding: 4px 10px; color: oklch(92.4% .12 95.746); font: 700 10px Aptos, 'Segoe UI Variable', sans-serif; letter-spacing: .14em; }"
+    },
+    {
+      "name": "Primary Account CTA",
+      "kind": "button",
+      "refersTo": "landing-primary-cta",
+      "description": "The public route's single decisive action: create a simulated-trading account.",
+      "html": "<a class=\"ds-account-cta\" href=\"#\">Create free account</a>",
+      "css": ".ds-account-cta { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; border: 0; border-radius: 0; padding: 12px 24px; background: oklch(86.5% .127 207.078); color: #07101e; font: 700 14px Aptos, 'Segoe UI Variable', sans-serif; text-decoration: none; transition: background-color .15s; } .ds-account-cta:hover { background: oklch(91.7% .08 205.041); } .ds-account-cta:focus-visible { outline: 2px solid oklch(86.5% .127 207.078); outline-offset: 2px; }"
+    },
+    {
+      "name": "Terminal Explorer CTA",
+      "kind": "button",
+      "refersTo": "landing-secondary-cta",
+      "description": "A secondary public-route escape hatch for visitors who want to inspect the practice terminal first.",
+      "html": "<a class=\"ds-terminal-cta\" href=\"#\">Explore the terminal</a>",
+      "css": ".ds-terminal-cta { display: inline-flex; min-height: 48px; align-items: center; justify-content: center; border: 1px solid #2a3a54; border-radius: 0; padding: 12px 24px; background: transparent; color: #e2e8f0; font: 600 14px Aptos, 'Segoe UI Variable', sans-serif; text-decoration: none; transition: border-color .15s, color .15s; } .ds-terminal-cta:hover { border-color: oklch(86.5% .127 207.078); color: #f1f5f9; } .ds-terminal-cta:focus-visible { outline: 2px solid oklch(86.5% .127 207.078); outline-offset: 2px; }"
+    },
+    {
+      "name": "First Session Preview",
+      "kind": "card",
+      "refersTo": "first-session-preview",
+      "description": "The right-side hero instrument that reduces the first simulated session to three credible, numbered steps.",
+      "html": "<section class=\"ds-session\"><p>YOUR FIRST SESSION</p><h3>Learn by doing</h3><ol><li><b>01</b><span>Create an account</span></li><li><b>02</b><span>Get oriented</span></li><li><b>03</b><span>Make a simulated trade</span></li></ol></section>",
+      "css": ".ds-session { border: 1px solid #2a3a54; border-radius: 0; border-top-color: oklch(86.5% .127 207.078); padding: 20px; background: #0d1727; color: #f1f5f9; font-family: Aptos, 'Segoe UI Variable', sans-serif; } .ds-session p { margin: 0; color: oklch(91.7% .08 205.041); font-size: 10px; font-weight: 700; letter-spacing: .14em; } .ds-session h3 { margin: 6px 0 12px; font-size: 20px; } .ds-session ol { margin: 0; padding: 0; list-style: none; } .ds-session li { display: grid; grid-template-columns: 42px 1fr; gap: 16px; border-top: 1px solid #1e2a40; padding: 16px 0; font-size: 14px; } .ds-session b { color: oklch(91.7% .08 205.041); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }"
+    },
+    {
+      "name": "Market Entry",
+      "kind": "card",
+      "refersTo": "market-entry",
+      "description": "A square, bordered practice-pair cell that arrives after the conversion story, as optional exploration.",
+      "html": "<a class=\"ds-market-entry\" href=\"#\"><span>BTC/USDT</span><small>Open a simulated market view</small><b>Explore →</b></a>",
+      "css": ".ds-market-entry { display: grid; gap: 12px; border: 1px solid #1e2a40; border-radius: 0; padding: 20px; background: #0d1727; color: #f1f5f9; font-family: Aptos, 'Segoe UI Variable', sans-serif; text-decoration: none; transition: background-color .15s; } .ds-market-entry:hover { background: #101d30; } .ds-market-entry span { font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; } .ds-market-entry small { color: #64748b; font-size: 12px; } .ds-market-entry b { color: #cbd5e1; font-size: 14px; font-weight: 400; } .ds-market-entry:hover b { color: oklch(91.7% .08 205.041); } .ds-market-entry:focus-visible { outline: 2px solid oklch(86.5% .127 207.078); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Verified Trading Desk",
+    "overview": "Phoenix is a dark-first simulated-trading system that changes density without changing identity. It uses square tonal panels, faint blue-steel rules, tight spacing, and tabular numbers to feel instrument-like rather than promotional.\n\nThe public entry route stages safe practice before market data: the account action and a clear no-real-assets disclosure lead, while a first-session preview makes the next three actions concrete. The trading workspace then returns to high-density operating behavior. Both surfaces keep simulated status unmissable and use the same cyan, amber, green, and rose semantics.",
+    "keyCharacteristics": ["High-density desktop trading layout with an 8/4 content-and-order-entry split.", "A calmer public conversion route with an account CTA on the left and a first-session preview on the right.", "Flat layered surfaces instead of card shadows or rounded consumer-app chrome.", "Sans-serif interface language paired with monospaced, tabular market values.", "Cyan for focus, navigation, and selected controls; green and rose only for market direction."],
+    "rules": [
+      { "name": "Semantic Color Rule", "body": "Cyan explains interface state and the public account action; green and rose explain market direction; amber explains simulation. Do not reuse those accents as generic decoration.", "section": "colors" },
+      { "name": "Numbers-First Rule", "body": "Use monospaced tabular numerals for data that users scan vertically or compare horizontally; do not use them for ordinary navigation or explanatory copy.", "section": "typography" },
+      { "name": "Practice-Before-Price Rule", "body": "On the public root, make the first simulated session and account creation legible before asking a newcomer to parse market rows. The terminal may lead with market data because its visitor is there to operate.", "section": "layout" },
+      { "name": "Rule-Not-Shadow Rule", "body": "Separate market modules with tonal steps and hairline borders; reserve blur for the sticky header only.", "section": "elevation" }
+    ],
+    "dos": ["Do preserve the dark canvas → panel → input tonal hierarchy and 1px blue-steel rules.", "Do use square edges for controls and containers; reserve roundness for small status/asset dots.", "Do put volatile market data in monospaced tabular figures and align numeric columns to the right where they compare.", "Do retain a persistent, amber simulated-trading disclosure and explicit no-real-assets messaging in relevant order-entry contexts.", "Do keep cyan sparse and functional: focus, selected state, and navigational emphasis.", "Do keep the public root conversion-first: account creation leads, the first session is previewed, and market pairs arrive later as optional exploration."],
+    "donts": ["Don't introduce shadows, floating rounded cards, gradients, or decorative visualizations.", "Don't use green, rose, or amber as arbitrary brand accents; they have directional and safety meaning.", "Don't present simulated trading as real custody, wallet activity, deposits, withdrawals, or executable external orders.", "Don't loosen the information density with oversized type, tall rows, or excessive whitespace.", "Don't move the terminal's order-book density into the public first viewport or let the terminal-explorer CTA outrank account creation."]
+  }
+}

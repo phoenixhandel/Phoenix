@@ -1,0 +1,23 @@
+{
+  "name": "@phoenix/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run --environment jsdom",
+    "build": "tsc --noEmit && vite build"
+  },
+  "dependencies": {
+    "@phoenix/shared": "*",
+    "@supabase/supabase-js": "^2.112.3",
+    "@tailwindcss/vite": "^4.1.12",
+    "lightweight-charts": "^5.2.1",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.18.2",
+    "zustand": "^5.0.15"
+  }
+}

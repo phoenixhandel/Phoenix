@@ -1,0 +1,9 @@
+export const supportGuidance = (question: string, language: "de" | "en") => {
+  const normalized = question.toLowerCase();
+  const de = language === "de";
+  if (/(phone|sms|telefon|mobil|kontakt)/.test(normalized)) return de ? "Öffnen Sie die Kontoverifizierung und bestätigen Sie Ihre Telefonnummer mit dem SMS-Code. Die Funktion wird verfügbar, sobald der SMS-Anbieter eingerichtet ist." : "Open account verification and confirm your phone number with the SMS code. The feature becomes available once the SMS provider is configured.";
+  if (/(verify|identity|kyc|verifiz|identit)/.test(normalized)) return de ? "Tier 1 ist mit Ihrer bestätigten E-Mail-Adresse abgeschlossen. Tier 2 ergänzt eine Telefonnummer. Die Identitätsprüfung ist derzeit vorübergehend außer Betrieb." : "Tier 1 is complete with your confirmed email address. Tier 2 adds a phone number. Identity verification is temporarily unavailable.";
+  if (/(trade|order|buy|sell|fee|markt|market|price|coin|crypto)/.test(normalized)) return de ? "Öffnen Sie Märkte, um verfügbare Krypto-Assets, Kursreferenzen und Verläufe zu sehen. Marktinformationen sind keine Finanzberatung." : "Open Markets to see available crypto assets, price references, and history. Market information is not financial advice.";
+  if (/(login|sign|password|account|zugang|konto|passwort)/.test(normalized)) return de ? "Wenn Sie sich nicht anmelden können, nutzen Sie Passwort zurücksetzen. Geschützte Phoenix Bereiche setzen eine bestätigte E-Mail-Adresse voraus." : "If you cannot sign in, use password reset. Protected Phoenix areas require a confirmed email address.";
+  return de ? "Ich helfe gern bei Zugang, Verifizierung, Märkten und Kontonavigation. Teilen Sie niemals Passwörter, Einmalcodes oder Dokumente im Chat." : "I can help with access, verification, markets, and account navigation. Never share passwords, one-time codes, or documents in chat.";
+};
