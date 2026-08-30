@@ -10,13 +10,13 @@ afterEach(() => {
 });
 
 describe("AccountPage", () => {
-  it("shows a useful crypto dashboard when a verified account has no assets yet", async () => {
+  it("shows zero-value wallets and account actions for a verified account", async () => {
     window.localStorage.setItem("phoenix_access_token", "test-token");
     vi.stubGlobal(
       "fetch",
       vi
         .fn()
-        .mockResolvedValue({ ok: true, json: async () => ({ balances: {} }) })
+        .mockResolvedValue({ ok: true, json: async () => ({ balances: { BTC: "0.000000000000", ETH: "0.000000000000", SOL: "0.000000000000", XRP: "0.000000000000", USDT: "0.000000000000" } }) })
     );
 
     render(
@@ -30,8 +30,11 @@ describe("AccountPage", () => {
     ).toBeTruthy();
     expect(screen.getByRole("link", { name: "Märkte entdecken" })).toBeTruthy();
     expect(
-      await screen.findByText("Noch keine Assets in deinem Konto.")
+      await screen.findByText("Bitcoin")
     ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Einzahlen" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Konvertieren" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Auszahlen" })).toBeTruthy();
   });
 
   it("keeps the dashboard useful when account data cannot be reached", async () => {

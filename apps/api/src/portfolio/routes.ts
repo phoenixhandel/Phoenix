@@ -12,7 +12,7 @@ export const registerPortfolioRoutes = (
     const client = await pool.connect();
     try {
       const balances = await client.query<{ asset_symbol: string; balance: string }>(
-        "SELECT asset_symbol, balance::text AS balance FROM portfolio_balances WHERE user_id = $1 ORDER BY asset_symbol",
+        "SELECT asset.symbol AS asset_symbol, COALESCE(balance.balance, 0)::text AS balance FROM assets AS asset LEFT JOIN portfolio_balances AS balance ON balance.asset_symbol = asset.symbol AND balance.user_id = $1 WHERE asset.enabled ORDER BY asset.symbol",
         [user.userId]
       );
       response.status(200).json({

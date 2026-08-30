@@ -24,6 +24,7 @@ testUrl.pathname = `/${databaseName}`;
 
 const admin = new Client({ connectionString: baseUrl.toString() });
 const database = new Client({ connectionString: testUrl.toString() });
+const legacyUserId = randomUUID();
 
 beforeAll(async () => {
   await admin.connect();
@@ -33,7 +34,13 @@ beforeAll(async () => {
 
   await database.connect();
   const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
-  await runMigrations(database, await loadMigrations(path.join(currentDirectory, "migrations")));
+  const migrations = await loadMigrations(path.join(currentDirectory, "migrations"));
+  await runMigrations(database, migrations.filter(({ name }) => name !== "0005_wallets.sql"));
+  await database.query(
+    "INSERT INTO users (user_id, auth_user_id, username, email) VALUES ($1, $2, $3, $4)",
+    [legacyUserId, randomUUID(), "legacy_wallet_user", "legacy@example.test"]
+  );
+  await runMigrations(database, migrations.filter(({ name }) => name === "0005_wallets.sql"));
 });
 
 afterAll(async () => {
@@ -64,6 +71,28 @@ describe("Phoenix core schema", () => {
         "market_configuration"
       ])
     );
+  });
+
+  it("creates supported zero wallets for users that existed before the wallet migration", async () => {
+    const wallets = await database.query<{ asset_symbol: string; balance: string }>(
+      "SELECT asset_symbol, balance::text AS balance FROM portfolio_balances WHERE user_id = $1 ORDER BY asset_symbol",
+      [legacyUserId]
+    );
+    const ledgerAccounts = await database.query<{ asset_symbol: string }>(
+      "SELECT asset_symbol FROM ledger_accounts WHERE owner_user_id = $1 AND account_type = 'USER' ORDER BY asset_symbol",
+      [legacyUserId]
+    );
+
+    expect(wallets.rows).toEqual([
+      { asset_symbol: "BTC", balance: "0.000000000000" },
+      { asset_symbol: "ETH", balance: "0.000000000000" },
+      { asset_symbol: "SOL", balance: "0.000000000000" },
+      { asset_symbol: "USDT", balance: "0.000000000000" },
+      { asset_symbol: "XRP", balance: "0.000000000000" }
+    ]);
+    expect(ledgerAccounts.rows.map(({ asset_symbol }) => asset_symbol)).toEqual([
+      "BTC", "ETH", "SOL", "USDT", "XRP"
+    ]);
   });
 
   it("rejects a ledger transaction without balancing entries", async () => {

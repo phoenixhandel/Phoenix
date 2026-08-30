@@ -52,6 +52,11 @@ const content = {
     activeCopy: "Deine E-Mail-Adresse wurde bestätigt.",
     assets: "Deine Assets",
     assetsCopy: "Eine klare Übersicht deiner verfügbaren Bestände.",
+    deposit: "Einzahlen",
+    convert: "Konvertieren",
+    withdraw: "Auszahlen",
+    depositUnavailable: "Einzahlungen sind für dieses Konto derzeit nicht verfügbar.",
+    withdrawUnavailable: "Auszahlungen sind für dieses Konto derzeit nicht verfügbar.",
     loading: "Portfolio wird geladen…",
     emptyTitle: "Noch keine Assets in deinem Konto.",
     emptyCopy: "Entdecke unterstützte Märkte, sobald du bereit bist.",
@@ -99,6 +104,11 @@ const content = {
     activeCopy: "Your email address has been confirmed.",
     assets: "Your assets",
     assetsCopy: "A clear overview of your available balances.",
+    deposit: "Deposit",
+    convert: "Convert",
+    withdraw: "Withdraw",
+    depositUnavailable: "Deposits are not available for this account at the moment.",
+    withdrawUnavailable: "Withdrawals are not available for this account at the moment.",
     loading: "Loading portfolio…",
     emptyTitle: "No assets in your account yet.",
     emptyCopy: "Explore supported markets whenever you are ready.",
@@ -152,6 +162,7 @@ export const AccountPage = ({ page }: { page: Page }) => {
   const [requestState, setRequestState] = useState<
     "loading" | "ready" | "unavailable"
   >("loading");
+  const [walletNotice, setWalletNotice] = useState<string | null>(null);
   const token = window.localStorage.getItem("phoenix_access_token");
   const route =
     page in endpoints ? endpoints[page as keyof typeof endpoints] : null;
@@ -225,13 +236,19 @@ export const AccountPage = ({ page }: { page: Page }) => {
             <h2 className="text-lg font-semibold text-white">{copy.assets}</h2>
             <p className="mt-1 text-sm text-slate-400">{copy.assetsCopy}</p>
           </div>
-          <a
-            href="/markets"
-            className="text-sm font-semibold text-cyan-200 hover:text-cyan-100"
-          >
-            {copy.markets} →
-          </a>
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" onClick={() => setWalletNotice(copy.depositUnavailable)} className="min-h-10 border border-[#2a3a54] px-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-white">
+              {copy.deposit}
+            </button>
+            <a href="/markets" className="inline-flex min-h-10 items-center bg-cyan-300 px-3 text-sm font-bold text-[#07101e] transition hover:bg-cyan-200">
+              {copy.convert}
+            </a>
+            <button type="button" onClick={() => setWalletNotice(copy.withdrawUnavailable)} className="min-h-10 border border-[#2a3a54] px-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-white">
+              {copy.withdraw}
+            </button>
+          </div>
         </div>
+        {walletNotice ? <p role="status" className="border-b border-amber-300/20 bg-amber-300/5 px-5 py-3 text-sm text-amber-100">{walletNotice}</p> : null}
         {balanceRows.length ? (
           <div>
             {balanceRows.map(([asset, value]) => (

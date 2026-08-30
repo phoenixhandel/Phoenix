@@ -1,6 +1,9 @@
 import { describe, expect, it, vi, afterEach } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import type { ComponentType } from "react";
+import { MemoryRouter } from "react-router-dom";
+import { ExchangePage } from "./App";
+import { useExchangeStore } from "./exchange-store";
 import { LandingPage } from "./LandingPage";
 
 type AppModule = {
@@ -17,6 +20,7 @@ afterEach(() => {
   cleanup();
   window.history.replaceState({}, "", "/");
   vi.unstubAllGlobals();
+  useExchangeStore.getState().reset();
 });
 
 describe("Phoenix product access", () => {
@@ -62,5 +66,19 @@ describe("Phoenix product access", () => {
     render(<LandingPage />);
 
     await waitFor(() => expect(fetch).toHaveBeenCalledWith("http://localhost:3001/api/market/feed?pairs=BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BTCETH,BTCSOL"));
+  });
+
+  it("does not show invented funds while a wallet balance is unavailable", () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+
+    render(
+      <MemoryRouter>
+        <ExchangePage />
+      </MemoryRouter>
+    );
+
+    expect(screen.queryByText("84,372.94")).toBeNull();
+    expect(screen.queryByText("0.8462")).toBeNull();
+    expect(screen.getByText("Available")).toBeTruthy();
   });
 });

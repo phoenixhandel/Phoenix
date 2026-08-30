@@ -17,6 +17,14 @@ export const registerProvisionRoutes = (app: Express, { auth, pool }: { auth: Au
       const result = await client.query<{ user_id: string; email: string | null; email_verified: boolean; created: boolean }>("INSERT INTO users (user_id, auth_user_id, email, email_verified, phone, phone_verified) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5) ON CONFLICT (auth_user_id) DO UPDATE SET email = EXCLUDED.email, email_verified = EXCLUDED.email_verified, phone = EXCLUDED.phone, phone_verified = EXCLUDED.phone_verified, last_login_at = now() RETURNING user_id, email, email_verified, (xmax = 0) AS created", [identity.id, identity.email, identity.emailVerified, identity.phone ?? null, identity.phoneVerified ?? false]);
       const user = result.rows[0];
       if (!user) throw new Error("USER_PROVISIONING_FAILED");
+      await client.query(
+        "INSERT INTO ledger_accounts (owner_user_id, asset_symbol, account_type) SELECT $1, symbol, 'USER'::ledger_account_type FROM assets WHERE enabled ON CONFLICT (owner_user_id, asset_symbol) WHERE account_type = 'USER' DO NOTHING",
+        [user.user_id]
+      );
+      await client.query(
+        "INSERT INTO portfolio_balances (user_id, asset_symbol, balance) SELECT $1, symbol, 0 FROM assets WHERE enabled ON CONFLICT (user_id, asset_symbol) DO NOTHING",
+        [user.user_id]
+      );
       if (user.created) await client.query("INSERT INTO activity_events (user_id, event_type, metadata) VALUES ($1, 'ACCOUNT_REGISTERED', '{}'::jsonb)", [user.user_id]);
       response.status(201).json({ userId: user.user_id, email: user.email, emailVerified: user.email_verified });
     } finally { client.release(); }

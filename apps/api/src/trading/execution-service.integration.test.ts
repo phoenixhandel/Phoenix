@@ -31,10 +31,8 @@ beforeAll(async () => {
   await database.connect();
   await migrate();
   await database.query("INSERT INTO users (user_id, auth_user_id, username, email) VALUES ($1, $2, 'trade_tester', 'trade@example.test')", [userId, randomUUID()]);
-  await database.query("INSERT INTO assets (symbol, name) VALUES ('BTC', 'Bitcoin'), ('USDT', 'Tether')");
-  await database.query("INSERT INTO trading_pairs (pair_symbol, base_asset, quote_asset) VALUES ('BTCUSDT', 'BTC', 'USDT')");
   await database.query(
-    "INSERT INTO ledger_accounts (owner_user_id, asset_symbol, account_type) VALUES ($1, 'BTC', 'USER'), ($1, 'USDT', 'USER'), (NULL, 'BTC', 'SYSTEM_LIQUIDITY'), (NULL, 'USDT', 'SYSTEM_LIQUIDITY'), (NULL, 'USDT', 'SYSTEM_FEES')",
+    "INSERT INTO ledger_accounts (owner_user_id, asset_symbol, account_type) VALUES ($1, 'BTC', 'USER'), ($1, 'USDT', 'USER')",
     [userId]
   );
   await database.query("INSERT INTO portfolio_balances (user_id, asset_symbol, balance) VALUES ($1, 'BTC', 0), ($1, 'USDT', 1000)", [userId]);

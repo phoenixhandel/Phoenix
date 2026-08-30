@@ -42,9 +42,8 @@ beforeAll(async () => {
     "INSERT INTO users (user_id, auth_user_id, username, email) VALUES ($1, $2, 'ledger_tester', 'ledger@example.test')",
     [userId, randomUUID()]
   );
-  await database.query("INSERT INTO assets (symbol, name) VALUES ('BTC', 'Bitcoin')");
   await database.query(
-    "INSERT INTO ledger_accounts (owner_user_id, asset_symbol, account_type) VALUES ($1, 'BTC', 'USER'), (NULL, 'BTC', 'SYSTEM_ADJUSTMENT')",
+    "INSERT INTO ledger_accounts (owner_user_id, asset_symbol, account_type) VALUES ($1, 'BTC', 'USER')",
     [userId]
   );
 });

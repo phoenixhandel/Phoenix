@@ -11,7 +11,11 @@ describe("account provisioning", () => {
     const app = express(); registerProvisionRoutes(app, { auth: { getUser: async () => ({ id: "auth", email: "user@test", emailVerified: true }) }, pool });
     const response = await request(app).post("/api/auth/provision").set("authorization", "Bearer token");
     expect(response.status).toBe(201); expect(response.body).toEqual({ userId: "user", email: "user@test", emailVerified: true });
-    expect(calls).toEqual(expect.arrayContaining([expect.stringContaining("ACCOUNT_REGISTERED")]));
+    expect(calls).toEqual(expect.arrayContaining([
+      expect.stringContaining("ACCOUNT_REGISTERED"),
+      expect.stringContaining("INSERT INTO ledger_accounts"),
+      expect.stringContaining("INSERT INTO portfolio_balances")
+    ]));
   });
 
   it("does not create a Phoenix account before the email is confirmed", async () => {

@@ -89,7 +89,7 @@ const DepthRow = ({
   </div>
 );
 
-const ExchangePage = () => {
+export const ExchangePage = () => {
   const { pair: routePair } = useParams();
   const navigate = useNavigate();
   const [side, setSide] = useState<"BUY" | "SELL">("BUY");
@@ -117,6 +117,15 @@ const ExchangePage = () => {
     setPair
   } = useExchangeStore();
   const [baseAsset, quoteAsset] = pairAssets[pair] ?? ["BTC", "USDT"];
+  const availableAsset = side === "BUY" ? quoteAsset : baseAsset;
+  const availableBalance = Number(portfolio?.[availableAsset] ?? "0");
+  const visiblePortfolio = portfolio ?? {
+    USDT: "0",
+    BTC: "0",
+    ETH: "0",
+    SOL: "0",
+    XRP: "0"
+  };
   const marketPrice = Number(ticker?.price ?? "64280.10");
   const priceLabel = marketPrice.toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -519,13 +528,10 @@ const ExchangePage = () => {
                   <span className="min-w-0 text-right text-xs text-slate-500">
                     Available{" "}
                     <strong className="font-mono text-slate-300">
-                      {Number(
-                        portfolio?.[side === "BUY" ? quoteAsset : baseAsset] ??
-                          (side === "BUY" ? "100000" : "1.55")
-                      ).toLocaleString("en-US", {
+                      {availableBalance.toLocaleString("en-US", {
                         maximumFractionDigits: 8
                       })}{" "}
-                      {side === "BUY" ? quoteAsset : baseAsset}
+                      {availableAsset}
                     </strong>
                   </span>
                 </div>
@@ -567,7 +573,7 @@ const ExchangePage = () => {
                       type="button"
                       key={value}
                       onClick={() =>
-                        setAmount(((value / 100) * 1.55).toFixed(2))
+                        setAmount(((value / 100) * availableBalance).toFixed(8))
                       }
                       className="border border-[#26364d] py-1.5 text-[11px] text-slate-400 transition hover:border-cyan-300/70 hover:text-cyan-100"
                     >
@@ -632,13 +638,7 @@ const ExchangePage = () => {
                 </a>
               </div>
               <div className="mt-4 space-y-3">
-                {Object.entries(
-                  portfolio ?? {
-                    USDT: "84372.94",
-                    BTC: "0.8462",
-                    ETH: "9.1200"
-                  }
-                )
+                {Object.entries(visiblePortfolio)
                   .slice(0, 5)
                   .map(([asset, value], index) => (
                     <div
