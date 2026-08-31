@@ -32,6 +32,9 @@ services:
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:?Set SUPABASE_ANON_KEY in .env.production}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_SUPPORT_MODEL: ${OPENAI_SUPPORT_MODEL:-gpt-5.6}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      SUPPORT_FROM_EMAIL: ${SUPPORT_FROM_EMAIL:-}
+      SUPPORT_INBOX_EMAIL: ${SUPPORT_INBOX_EMAIL:-phoenixhandel@protonmail.com}
     expose:
       - "3001"
     depends_on:
