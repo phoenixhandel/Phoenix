@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { useAuthSession } from "./auth-session";
 
 const pendingNoticeKey = "phoenix_route_notice";
+export const routeNoticeEvent = "phoenix:open-route-notice";
 
 // Replace this public image file to change the route-change notice.
 export const routeChangeNoticeImage = {
@@ -27,6 +28,13 @@ export const RouteChangeModal = () => {
     if (window.sessionStorage.getItem(pendingNoticeKey) !== "1") return;
     window.sessionStorage.removeItem(pendingNoticeKey);
     setOpen(true);
+  }, [state]);
+
+  useEffect(() => {
+    if (state !== "verified") return;
+    const openNotice = () => setOpen(true);
+    window.addEventListener(routeNoticeEvent, openNotice);
+    return () => window.removeEventListener(routeNoticeEvent, openNotice);
   }, [state]);
 
   useEffect(() => {

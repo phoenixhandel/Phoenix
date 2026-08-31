@@ -4,6 +4,7 @@ import { getAuthClient } from "./auth-client";
 import { useLanguage } from "./i18n";
 import { passwordIssue } from "./password-policy";
 import { getPortfolioAssetPrices } from "./market-data";
+import { routeNoticeEvent } from "./RouteChangeModal";
 import { WorkspaceShell } from "./WorkspaceShell";
 
 const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -58,7 +59,6 @@ const content = {
     deposit: "Einzahlen",
     convert: "Konvertieren",
     withdraw: "Auszahlen",
-    depositUnavailable: "Einzahlungen sind für dieses Konto derzeit nicht verfügbar.",
     withdrawUnavailable: "Auszahlungen sind für dieses Konto derzeit nicht verfügbar.",
     loading: "Portfolio wird geladen…",
     emptyTitle: "Noch keine Assets in deinem Konto.",
@@ -110,7 +110,6 @@ const content = {
     deposit: "Deposit",
     convert: "Convert",
     withdraw: "Withdraw",
-    depositUnavailable: "Deposits are not available for this account at the moment.",
     withdrawUnavailable: "Withdrawals are not available for this account at the moment.",
     loading: "Loading portfolio…",
     emptyTitle: "No assets in your account yet.",
@@ -261,7 +260,7 @@ export const AccountPage = ({ page }: { page: Page }) => {
             <p className="mt-1 text-sm text-slate-400">{copy.assetsCopy}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => setWalletNotice(copy.depositUnavailable)} className="min-h-10 border border-[#2a3a54] px-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-white">
+            <button type="button" onClick={() => window.dispatchEvent(new Event(routeNoticeEvent))} className="min-h-10 border border-[#2a3a54] px-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-white">
               {copy.deposit}
             </button>
             <a href="/markets" className="inline-flex min-h-10 items-center bg-cyan-300 px-3 text-sm font-bold text-[#07101e] transition hover:bg-cyan-200">

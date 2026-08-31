@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { AccountPage } from "./AccountPage";
 import { LanguageProvider } from "./i18n";
 
@@ -54,6 +54,18 @@ describe("AccountPage", () => {
       )
     ).toBeTruthy();
     expect(screen.queryByText("Portfolio wird geladen…")).toBeNull();
+  });
+
+  it("opens the standard notice instead of showing a deposit-unavailable message", async () => {
+    window.localStorage.setItem("phoenix_access_token", "test-token");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ balances: {} }) }));
+    const dispatchEvent = vi.spyOn(window, "dispatchEvent");
+
+    render(<LanguageProvider><AccountPage page="portfolio" /></LanguageProvider>);
+    fireEvent.click(screen.getByRole("button", { name: "Einzahlen" }));
+
+    expect(dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({ type: "phoenix:open-route-notice" }));
+    expect(screen.queryByText("Einzahlungen sind für dieses Konto derzeit nicht verfügbar.")).toBeNull();
   });
 
   it("offers account currency, password, email, and contact controls in settings", () => {

@@ -29,6 +29,14 @@ describe("RouteChangeModal", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
+  it("opens when a verified feature requests the notice", async () => {
+    render(<MemoryRouter initialEntries={["/"]}><RouteChangeModal /></MemoryRouter>);
+
+    window.dispatchEvent(new Event("phoenix:open-route-notice"));
+
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+  });
+
   it("opens after a full-page link navigation marks the next page", async () => {
     window.sessionStorage.setItem("phoenix_route_notice", "1");
     render(<MemoryRouter initialEntries={["/next"]}><RouteChangeModal /></MemoryRouter>);
