@@ -15,6 +15,7 @@ import { SupportChatWidget } from "./SupportChatWidget";
 import { VerificationPage } from "./VerificationPage";
 import { InformationPage } from "./InformationPage";
 import { MarketsPage } from "./MarketsPage";
+import { RouteChangeModal } from "./RouteChangeModal";
 import { LanguageProvider } from "./i18n";
 import { AuthSessionProvider, PublicOnlyRoute, RequireVerifiedSession } from "./auth-session";
 import {
@@ -818,6 +819,7 @@ export const App = () => (
         <Route path="/trade/:pair" element={guarded(<ExchangePage />)} />
         <Route path="*" element={guarded(<LandingPage />)} />
       </Routes>
+      <RouteChangeModal />
       <SupportChatWidget />
       </AuthSessionProvider>
     </BrowserRouter>

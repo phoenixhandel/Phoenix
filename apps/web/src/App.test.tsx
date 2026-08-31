@@ -34,7 +34,7 @@ describe("Phoenix product access", () => {
 
     render(<application.App />);
 
-    expect(screen.getByRole("heading", { name: /ihre krypto-welt, klar organisiert/i })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: /ihre krypto-welt, klar organisiert/i })).toBeTruthy();
   });
 
   it("shows a German asset-market section without a terminal CTA", () => {
