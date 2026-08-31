@@ -22,9 +22,10 @@ export const PhoneVerificationPage = () => {
 
   const sendCode = async () => {
     if (remaining) { setMessage(de ? "Bitte warten Sie kurz, bevor Sie einen weiteren Code anfordern." : "Please wait briefly before requesting another code."); return; }
+    if (!/^\+[1-9]\d{7,14}$/.test(phone)) { setMessage(de ? "Bitte geben Sie eine gültige internationale Mobilnummer ein." : "Enter a valid international phone number."); return; }
     const auth = getAuthClient();
     if (!auth) { setMessage(de ? "Die SMS-Bestätigung ist in dieser Umgebung noch nicht eingerichtet." : "Phone verification is not configured in this environment."); return; }
-    const { error } = await auth.auth.signInWithOtp({ phone });
+    const { error } = await auth.auth.updateUser({ phone });
     setMessage(error?.message ?? (de ? "Bestätigungscode gesendet." : "Verification code sent."));
     setSent(!error);
     if (!error) setAvailableAt(nextOtpSendAt());
@@ -34,7 +35,7 @@ export const PhoneVerificationPage = () => {
     event.preventDefault();
     const auth = getAuthClient();
     if (!auth) return;
-    const { error } = await auth.auth.verifyOtp({ phone, token: code, type: "sms" });
+    const { error } = await auth.auth.verifyOtp({ phone, token: code, type: "phone_change" });
     if (error) { setMessage(error.message); return; }
     await provisionApplicationUser();
     setMessage(de ? "Telefonnummer bestätigt." : "Phone number verified.");
