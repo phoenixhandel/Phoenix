@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AuthPage } from "./AuthPage";
 
@@ -8,10 +8,7 @@ const auth = vi.hoisted(() => ({
     signUp: vi.fn().mockResolvedValue({ data: { user: { identities: [{}] } }, error: null }),
     verifyOtp: vi.fn(),
     resend: vi.fn(),
-    signInWithPassword: vi.fn(),
-    signInWithOAuth: vi.fn().mockResolvedValue({
-      error: { message: "Unsupported provider: provider is not enabled" }
-    })
+    signInWithPassword: vi.fn()
   }
 }));
 
@@ -20,12 +17,23 @@ vi.mock("./auth-client", () => ({
   provisionApplicationUser: provision
 }));
 
+vi.mock("./TurnstileCaptcha", () => ({
+  TurnstileCaptcha: ({ onToken }: { onToken: (token: string) => void }) => (
+    <button type="button" onClick={() => onToken("captcha-token")}>
+      Sicherheitsprüfung abschließen
+    </button>
+  )
+}));
+
+const completeCaptcha = () => fireEvent.click(screen.getByRole("button", { name: "Sicherheitsprüfung abschließen" }));
+
 afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
 describe("AuthPage", () => {
   it("moves a newly registered user to an eight-digit email confirmation step", async () => {
     render(<AuthPage mode="register" />);
 
+    completeCaptcha();
     fireEvent.change(screen.getByLabelText("Vollständiger Name"), {
       target: { value: "Enes Test" }
     });
@@ -53,6 +61,7 @@ describe("AuthPage", () => {
 
   it("blocks registration until the password policy is met", async () => {
     render(<AuthPage mode="register" />);
+    completeCaptcha();
     fireEvent.change(screen.getByLabelText("Vollständiger Name"), { target: { value: "Enes Test" } });
     fireEvent.change(screen.getByLabelText("E-Mail-Adresse"), { target: { value: "enes@example.com" } });
     fireEvent.change(screen.getByLabelText(/^Passwort$/), { target: { value: "alllowercase1!" } });
@@ -88,6 +97,7 @@ describe("AuthPage", () => {
     });
     render(<AuthPage mode="register" />);
 
+    completeCaptcha();
     fireEvent.change(screen.getByLabelText("Vollständiger Name"), { target: { value: "Enes Test" } });
     fireEvent.change(screen.getByLabelText("E-Mail-Adresse"), { target: { value: "existing@example.com" } });
     fireEvent.change(screen.getByLabelText(/^Passwort$/), { target: { value: "PhoenixSecure12!" } });
@@ -107,6 +117,7 @@ describe("AuthPage", () => {
     provision.mockRejectedValueOnce(new Error("ACCOUNT_PROVISIONING_FAILED"));
     render(<AuthPage mode="login" />);
 
+    completeCaptcha();
     fireEvent.change(screen.getByLabelText("E-Mail-Adresse"), { target: { value: "member@example.com" } });
     fireEvent.change(screen.getByLabelText("Passwort"), { target: { value: "PhoenixSecure12!" } });
     fireEvent.click(screen.getByRole("button", { name: "Anmelden" }));
@@ -114,30 +125,45 @@ describe("AuthPage", () => {
     expect(await screen.findByText(/Konto konnte nicht vorbereitet werden/)).toBeTruthy();
   });
 
-  it("offers Apple sign-in alongside Google on the access screen", () => {
+  it("does not render Google or Apple sign-in controls", () => {
     render(<AuthPage mode="login" />);
 
-    expect(
-      screen.getByRole("button", { name: "Mit Google fortfahren" })
-    ).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: "Mit Apple fortfahren" })
-    ).toBeTruthy();
-    expect(screen.getByAltText("Google logo")).toBeTruthy();
-    expect(screen.getByAltText("Apple logo")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Google|Apple/i })).toBeNull();
   });
 
-  it("explains when a selected OAuth provider has not been enabled", async () => {
+  it("passes the completed CAPTCHA token when registering", async () => {
+    render(<AuthPage mode="register" />);
+
+    completeCaptcha();
+    fireEvent.change(screen.getByLabelText("Vollständiger Name"), { target: { value: "Enes Test" } });
+    fireEvent.change(screen.getByLabelText("E-Mail-Adresse"), { target: { value: "enes@example.com" } });
+    fireEvent.change(screen.getByLabelText(/^Passwort$/), { target: { value: "PhoenixSecure12!" } });
+    fireEvent.change(screen.getByLabelText(/^Passwort wiederholen$/), { target: { value: "PhoenixSecure12!" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: /Ich akzeptiere/i }));
+    fireEvent.click(screen.getByRole("button", { name: "Konto erstellen" }));
+
+    await waitFor(() => expect(auth.auth.signUp).toHaveBeenCalledWith(expect.objectContaining({
+      options: expect.objectContaining({ captchaToken: "captcha-token" })
+    })));
+  });
+
+  it("passes the completed CAPTCHA token when signing in", async () => {
+    auth.auth.signInWithPassword.mockResolvedValueOnce({
+      data: { user: { email_confirmed_at: "2026-08-30T20:00:00.000Z" } },
+      error: null
+    });
+    provision.mockRejectedValueOnce(new Error("ACCOUNT_PROVISIONING_FAILED"));
     render(<AuthPage mode="login" />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Mit Google fortfahren" })
-    );
+    completeCaptcha();
+    fireEvent.change(screen.getByLabelText("E-Mail-Adresse"), { target: { value: "member@example.com" } });
+    fireEvent.change(screen.getByLabelText("Passwort"), { target: { value: "PhoenixSecure12!" } });
+    fireEvent.click(screen.getByRole("button", { name: "Anmelden" }));
 
-    expect(
-      await screen.findByText(
-        "Die Google-Anmeldung ist noch nicht aktiviert. Bitte verwenden Sie Ihre E-Mail-Adresse oder versuchen Sie es später erneut."
-      )
-    ).toBeTruthy();
+    await waitFor(() => expect(auth.auth.signInWithPassword).toHaveBeenCalledWith({
+      email: "member@example.com",
+      password: "PhoenixSecure12!",
+      options: { captchaToken: "captcha-token" }
+    }));
   });
 });

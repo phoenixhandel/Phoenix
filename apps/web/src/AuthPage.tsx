@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { getAuthClient, provisionApplicationUser } from "./auth-client";
-import { CompanyLogo } from "./CompanyLogo";
 import { LanguageSelect, useLanguage } from "./i18n";
 import { passwordIssue } from "./password-policy";
 import { nextOtpSendAt, otpCooldownSeconds } from "./otp-cooldown";
+import { TurnstileCaptcha } from "./TurnstileCaptcha";
 
 const copy = {
   de: {
@@ -31,8 +31,6 @@ const copy = {
     create: "Konto erstellen",
     enter: "Anmelden",
     send: "Link senden",
-    google: "Mit Google fortfahren",
-    apple: "Mit Apple fortfahren",
     registered:
       "Prüfen Sie Ihr Postfach. Bestätigen Sie Ihre E-Mail-Adresse, bevor Sie sich anmelden.",
     existingAccount:
@@ -43,10 +41,9 @@ const copy = {
       "Wenn ein Konto existiert, wurde ein Link zum Zurücksetzen versendet.",
     unconfigured:
       "Die Anmeldung ist in dieser Umgebung noch nicht konfiguriert.",
-    googleUnavailable:
-      "Die Google-Anmeldung ist noch nicht aktiviert. Bitte verwenden Sie Ihre E-Mail-Adresse oder versuchen Sie es später erneut.",
-    appleUnavailable:
-      "Die Apple-Anmeldung ist noch nicht aktiviert. Bitte verwenden Sie Ihre E-Mail-Adresse oder versuchen Sie es später erneut.",
+    captchaTitle: "Sicherheitsprüfung",
+    captchaPending: "Bitte schließen Sie die Sicherheitsprüfung ab, um fortzufahren.",
+    captchaUnavailable: "Die Sicherheitsprüfung ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.",
     mismatch: "Die Passwörter stimmen nicht überein.",
     agreement: "Bitte akzeptieren Sie die Nutzungsbedingungen.",
     verify:
@@ -96,8 +93,6 @@ const copy = {
     create: "Create account",
     enter: "Sign in",
     send: "Send link",
-    google: "Continue with Google",
-    apple: "Continue with Apple",
     registered:
       "Check your inbox. Confirm your email address before signing in.",
     existingAccount:
@@ -106,10 +101,9 @@ const copy = {
       "Your account could not be prepared. Please try again.",
     resetSent: "If an account exists, a password reset link has been sent.",
     unconfigured: "Authentication is not configured in this environment yet.",
-    googleUnavailable:
-      "Google sign-in is not enabled yet. Use your email address or try again later.",
-    appleUnavailable:
-      "Apple sign-in is not enabled yet. Use your email address or try again later.",
+    captchaTitle: "Security check",
+    captchaPending: "Complete the security check to continue.",
+    captchaUnavailable: "The security check is currently unavailable. Please try again later.",
     mismatch: "The passwords do not match.",
     agreement: "Please accept the Terms of Use.",
     verify: "Please confirm your email address first, then sign in.",
@@ -154,6 +148,9 @@ export const AuthPage = ({
   );
   const [verificationCode, setVerificationCode] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaRefreshKey, setCaptchaRefreshKey] = useState(0);
+  const [captchaUnavailable, setCaptchaUnavailable] = useState(false);
   const [emailSendAvailableAt, setEmailSendAvailableAt] = useState(0);
   const [clock, setClock] = useState(() => Date.now());
   const cooldownSeconds = otpCooldownSeconds(emailSendAvailableAt, clock);
@@ -217,15 +214,22 @@ export const AuthPage = ({
       if (!error) setEmailSendAvailableAt(nextOtpSendAt());
       return;
     }
+    if (!captchaToken) {
+      setMessage(captchaUnavailable ? text.captchaUnavailable : text.captchaPending);
+      return;
+    }
     if (mode === "register") {
       const result = await auth.auth.signUp({
         email,
         password,
         options: {
           data: { full_name: name },
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          captchaToken
         }
       });
+      setCaptchaToken(null);
+      setCaptchaRefreshKey((key) => key + 1);
       if (result.error) {
         setMessage(result.error.message);
         return;
@@ -239,7 +243,13 @@ export const AuthPage = ({
       setMessage(null);
       return;
     }
-    const result = await auth.auth.signInWithPassword({ email, password });
+    const result = await auth.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken }
+    });
+    setCaptchaToken(null);
+    setCaptchaRefreshKey((key) => key + 1);
     if (result.error) {
       setMessage(result.error.message);
       return;
@@ -256,26 +266,6 @@ export const AuthPage = ({
       return;
     }
     window.location.assign("/account");
-  };
-  const oauth = async (provider: "google" | "apple") => {
-    const auth = getAuthClient();
-    if (!auth) {
-      setMessage(text.unconfigured);
-      return;
-    }
-    const { error } = await auth.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback` }
-    });
-    if (error) {
-      setMessage(
-        /provider is not enabled/i.test(error.message)
-          ? provider === "google"
-            ? text.googleUnavailable
-            : text.appleUnavailable
-          : error.message
-      );
-    }
   };
   const confirmEmail = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -531,7 +521,23 @@ export const AuthPage = ({
                 </span>
               </label>
             ) : null}
-            <button className="w-full bg-cyan-300 py-3.5 text-sm font-bold text-[#07101e] transition hover:bg-cyan-200">
+            {mode !== "reset" ? (
+              <div className="border border-[#1e2a40] bg-[#0a1322] p-4">
+                <p className="text-sm font-semibold text-slate-200">{text.captchaTitle}</p>
+                <div className="mt-3 min-h-[65px]">
+                  <TurnstileCaptcha
+                    refreshKey={captchaRefreshKey}
+                    onToken={(token) => {
+                      setCaptchaToken(token);
+                      if (token) setCaptchaUnavailable(false);
+                    }}
+                    onUnavailable={() => setCaptchaUnavailable(true)}
+                  />
+                </div>
+                {!captchaToken ? <p className="mt-2 text-xs leading-5 text-slate-400">{captchaUnavailable ? text.captchaUnavailable : text.captchaPending}</p> : null}
+              </div>
+            ) : null}
+            <button disabled={mode !== "reset" && !captchaToken} className="w-full bg-cyan-300 py-3.5 text-sm font-bold text-[#07101e] transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-50">
               {mode === "register"
                 ? text.create
                 : mode === "reset"
@@ -539,33 +545,6 @@ export const AuthPage = ({
                   : text.enter}
             </button>
           </form>
-          {mode !== "reset" ? (
-            <>
-              <div className="my-6 flex items-center gap-3 text-xs text-slate-600">
-                <span className="h-px flex-1 bg-[#1e2a40]" />
-                OR
-                <span className="h-px flex-1 bg-[#1e2a40]" />
-              </div>
-              <div className="grid gap-2">
-                <button
-                  onClick={() => void oauth("google")}
-                  aria-label={text.google}
-                  className="flex w-full items-center justify-center gap-3 border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-900 transition hover:border-white hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
-                >
-                  <CompanyLogo domain="google.com" name="Google" size={20} />
-                  {text.google}
-                </button>
-                <button
-                  onClick={() => void oauth("apple")}
-                  aria-label={text.apple}
-                  className="flex w-full items-center justify-center gap-3 border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-900 transition hover:border-white hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
-                >
-                  <CompanyLogo domain="apple.com" name="Apple" size={20} />
-                  {text.apple}
-                </button>
-              </div>
-            </>
-          ) : null}
           {message ? (
             <p
               role="status"
