@@ -35,7 +35,7 @@ describe("AdminPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Apply balance update" }));
 
     await screen.findByText("Balance update recorded in the audit log.");
-    expect(fetch).toHaveBeenCalledWith("/api/admin/users/user-1/balance", expect.objectContaining({
+    expect(fetch).toHaveBeenCalledWith(`${import.meta.env.VITE_API_BASE_URL ?? ""}/api/admin/users/user-1/balance`, expect.objectContaining({
       method: "PUT",
       body: JSON.stringify({ asset: "USDT", newBalance: "1.25" })
     }));
