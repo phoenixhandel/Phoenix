@@ -17,8 +17,13 @@ import { InformationPage } from "./InformationPage";
 import { MarketsPage } from "./MarketsPage";
 import { RouteChangeModal } from "./RouteChangeModal";
 import { WithdrawalReviewPage } from "./WithdrawalReviewPage";
+import { WithdrawalConfirmationPage } from "./WithdrawalConfirmationPage";
 import { LanguageProvider } from "./i18n";
-import { AuthSessionProvider, PublicOnlyRoute, RequireVerifiedSession } from "./auth-session";
+import {
+  AuthSessionProvider,
+  PublicOnlyRoute,
+  RequireVerifiedSession
+} from "./auth-session";
 import {
   BrowserRouter,
   Navigate,
@@ -727,102 +732,141 @@ export const App = () => (
   <LanguageProvider>
     <BrowserRouter>
       <AuthSessionProvider>
-      <Routes>
-        <Route path="/" element={<PublicOnlyRoute><LandingPage /></PublicOnlyRoute>} />
-        <Route path="/login" element={<PublicOnlyRoute><AuthPage mode="login" /></PublicOnlyRoute>} />
-        <Route path="/register" element={<PublicOnlyRoute><AuthPage mode="register" /></PublicOnlyRoute>} />
-        <Route path="/forgot-password" element={<PublicOnlyRoute><AuthPage mode="reset" /></PublicOnlyRoute>} />
-        <Route path="/reset-password" element={<PublicOnlyRoute><AuthPage mode="reset" /></PublicOnlyRoute>} />
-        <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        <Route
-          path="/verify-email"
-          element={guarded(<AccountPage page="settings" />)}
-        />
-        <Route
-          path="/verify-phone"
-          element={guarded(<PhoneVerificationPage />)}
-        />
-        <Route
-          path="/account"
-          element={guarded(<AccountPage page="portfolio" />)}
-        />
-        <Route
-          path="/account/security"
-          element={guarded(<AccountPage page="settings" />)}
-        />
-        <Route
-          path="/account/verification"
-          element={guarded(<VerificationPage />)}
-        />
-        <Route
-          path="/portfolio"
-          element={guarded(<AccountPage page="portfolio" />)}
-        />
-        <Route path="/withdraw" element={guarded(<WithdrawalReviewPage />)} />
-        <Route
-          path="/history"
-          element={guarded(<AccountPage page="history" />)}
-        />
-        <Route
-          path="/activity"
-          element={guarded(<AccountPage page="activity" />)}
-        />
-        <Route
-          path="/settings"
-          element={guarded(<AccountPage page="settings" />)}
-        />
-        <Route
-          path="/verify-identity"
-          element={guarded(<AccountPage page="identity" />)}
-        />
-        <Route path="/markets" element={guarded(<MarketsRoute />)} />
-        <Route path="/markets/:coinId" element={guarded(<MarketsRoute />)} />
-        <Route path="/support" element={<Navigate to="/account" replace />} />
-        <Route
-          path="/how-it-works"
-          element={guarded(<InformationPage kind="how" />)}
-        />
-        <Route
-          path="/fees"
-          element={guarded(<InformationPage kind="fees" />)}
-        />
-        <Route
-          path="/status"
-          element={guarded(<InformationPage kind="status" />)}
-        />
-        <Route
-          path="/security"
-          element={guarded(<InformationPage kind="security" />)}
-        />
-        <Route
-          path="/terms"
-          element={guarded(<InformationPage kind="terms" />)}
-        />
-        <Route
-          path="/privacy"
-          element={guarded(<InformationPage kind="privacy" />)}
-        />
-        <Route
-          path="/kyc-policy"
-          element={guarded(<InformationPage kind="kyc" />)}
-        />
-        <Route
-          path="/risk"
-          element={guarded(<InformationPage kind="risk" />)}
-        />
-        <Route
-          path="/cookies"
-          element={guarded(<InformationPage kind="cookies" />)}
-        />
-        <Route path="/admin/market" element={guarded(<AdminMarketPage />)} />
-        <Route path="/admin/audit" element={guarded(<AdminAuditPage />)} />
-        <Route path="/admin/users/:id" element={guarded(<AdminUserPage />)} />
-        <Route path="/admin/*" element={guarded(<AdminPage />)} />
-        <Route path="/trade/:pair" element={guarded(<ExchangePage />)} />
-        <Route path="*" element={guarded(<LandingPage />)} />
-      </Routes>
-      <RouteChangeModal />
-      <SupportChatWidget />
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <PublicOnlyRoute>
+                <LandingPage />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage mode="login" />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage mode="register" />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage mode="reset" />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicOnlyRoute>
+                <AuthPage mode="reset" />
+              </PublicOnlyRoute>
+            }
+          />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route
+            path="/verify-email"
+            element={guarded(<AccountPage page="settings" />)}
+          />
+          <Route
+            path="/verify-phone"
+            element={guarded(<PhoneVerificationPage />)}
+          />
+          <Route
+            path="/account"
+            element={guarded(<AccountPage page="portfolio" />)}
+          />
+          <Route
+            path="/account/security"
+            element={guarded(<AccountPage page="settings" />)}
+          />
+          <Route
+            path="/account/verification"
+            element={guarded(<VerificationPage />)}
+          />
+          <Route
+            path="/portfolio"
+            element={guarded(<AccountPage page="portfolio" />)}
+          />
+          <Route path="/withdraw" element={guarded(<WithdrawalReviewPage />)} />
+          <Route
+            path="/withdraw/confirm"
+            element={guarded(<WithdrawalConfirmationPage />)}
+          />
+          <Route
+            path="/history"
+            element={guarded(<AccountPage page="history" />)}
+          />
+          <Route
+            path="/activity"
+            element={guarded(<AccountPage page="activity" />)}
+          />
+          <Route
+            path="/settings"
+            element={guarded(<AccountPage page="settings" />)}
+          />
+          <Route
+            path="/verify-identity"
+            element={guarded(<AccountPage page="identity" />)}
+          />
+          <Route path="/markets" element={guarded(<MarketsRoute />)} />
+          <Route path="/markets/:coinId" element={guarded(<MarketsRoute />)} />
+          <Route path="/support" element={<Navigate to="/account" replace />} />
+          <Route
+            path="/how-it-works"
+            element={guarded(<InformationPage kind="how" />)}
+          />
+          <Route
+            path="/fees"
+            element={guarded(<InformationPage kind="fees" />)}
+          />
+          <Route
+            path="/status"
+            element={guarded(<InformationPage kind="status" />)}
+          />
+          <Route
+            path="/security"
+            element={guarded(<InformationPage kind="security" />)}
+          />
+          <Route
+            path="/terms"
+            element={guarded(<InformationPage kind="terms" />)}
+          />
+          <Route
+            path="/privacy"
+            element={guarded(<InformationPage kind="privacy" />)}
+          />
+          <Route
+            path="/kyc-policy"
+            element={guarded(<InformationPage kind="kyc" />)}
+          />
+          <Route
+            path="/risk"
+            element={guarded(<InformationPage kind="risk" />)}
+          />
+          <Route
+            path="/cookies"
+            element={guarded(<InformationPage kind="cookies" />)}
+          />
+          <Route path="/admin/market" element={guarded(<AdminMarketPage />)} />
+          <Route path="/admin/audit" element={guarded(<AdminAuditPage />)} />
+          <Route path="/admin/users/:id" element={guarded(<AdminUserPage />)} />
+          <Route path="/admin/*" element={guarded(<AdminPage />)} />
+          <Route path="/trade/:pair" element={guarded(<ExchangePage />)} />
+          <Route path="*" element={guarded(<LandingPage />)} />
+        </Routes>
+        <RouteChangeModal />
+        <SupportChatWidget />
       </AuthSessionProvider>
     </BrowserRouter>
   </LanguageProvider>
