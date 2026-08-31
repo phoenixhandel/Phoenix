@@ -1,7 +1,11 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { MemoryRouter, useNavigate } from "react-router-dom";
 import { RouteChangeModal } from "./RouteChangeModal";
+
+const { mockUseAuthSession } = vi.hoisted(() => ({ mockUseAuthSession: vi.fn() }));
+
+vi.mock("./auth-session", () => ({ useAuthSession: mockUseAuthSession }));
 
 const NavigationFixture = () => {
   const navigate = useNavigate();
@@ -9,7 +13,11 @@ const NavigationFixture = () => {
 };
 
 describe("RouteChangeModal", () => {
-  afterEach(() => window.sessionStorage.clear());
+  beforeEach(() => mockUseAuthSession.mockReturnValue({ session: null, state: "verified" }));
+  afterEach(() => {
+    cleanup();
+    window.sessionStorage.clear();
+  });
 
   it("opens after a navigation and can be dismissed", async () => {
     render(<MemoryRouter initialEntries={["/"]}><NavigationFixture /></MemoryRouter>);
@@ -27,5 +35,14 @@ describe("RouteChangeModal", () => {
 
     expect(await screen.findByRole("dialog")).toBeTruthy();
     expect(window.sessionStorage.getItem("phoenix_route_notice")).toBeNull();
+  });
+
+  it("stays hidden for an anonymous visitor after a navigation", async () => {
+    mockUseAuthSession.mockReturnValue({ session: null, state: "anonymous" });
+    window.sessionStorage.setItem("phoenix_route_notice", "1");
+
+    render(<MemoryRouter initialEntries={["/markets"]}><RouteChangeModal /></MemoryRouter>);
+
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 });

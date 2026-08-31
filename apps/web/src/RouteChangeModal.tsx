@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
+import { useAuthSession } from "./auth-session";
 
 const pendingNoticeKey = "phoenix_route_notice";
 
@@ -14,18 +15,25 @@ export const routeChangeModalContent = {
 
 export const RouteChangeModal = () => {
   const location = useLocation();
+  const { state } = useAuthSession();
   const locationKey = `${location.key}:${location.pathname}${location.search}${location.hash}`;
   const previousLocation = useRef(locationKey);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (state !== "verified") {
+      window.sessionStorage.removeItem(pendingNoticeKey);
+      setOpen(false);
+      return;
+    }
     if (window.sessionStorage.getItem(pendingNoticeKey) !== "1") return;
     window.sessionStorage.removeItem(pendingNoticeKey);
     setOpen(true);
-  }, []);
+  }, [state]);
 
   useEffect(() => {
     const markFullPageNavigation = (event: MouseEvent) => {
+      if (state !== "verified") return;
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a[href]") : null;
       if (!link || link.target || link.hasAttribute("download")) return;
@@ -37,13 +45,14 @@ export const RouteChangeModal = () => {
     };
     document.addEventListener("click", markFullPageNavigation);
     return () => document.removeEventListener("click", markFullPageNavigation);
-  }, []);
+  }, [state]);
 
   useEffect(() => {
+    if (state !== "verified") return;
     if (previousLocation.current === locationKey) return;
     previousLocation.current = locationKey;
     setOpen(true);
-  }, [locationKey]);
+  }, [locationKey, state]);
 
   if (!open) return null;
 
