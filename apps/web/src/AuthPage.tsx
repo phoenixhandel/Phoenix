@@ -19,6 +19,10 @@ const copy = {
     email: "E-Mail-Adresse",
     password: "Passwort",
     confirm: "Passwort wiederholen",
+    showPassword: "Passwort anzeigen",
+    hidePassword: "Passwort verbergen",
+    showConfirmation: "Passwort wiederholen anzeigen",
+    hideConfirmation: "Passwort wiederholen verbergen",
     passwordRequirements: [
       "Mindestens 12 Zeichen",
       "Kleinbuchstabe",
@@ -81,6 +85,10 @@ const copy = {
     email: "Email address",
     password: "Password",
     confirm: "Confirm password",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    showConfirmation: "Show confirmation password",
+    hideConfirmation: "Hide confirmation password",
     passwordRequirements: [
       "At least 12 characters",
       "Lowercase letter",
@@ -131,6 +139,30 @@ const copy = {
   }
 } as const;
 
+const PasswordVisibilityButton = ({
+  visible,
+  showLabel,
+  hideLabel,
+  onClick
+}: {
+  visible: boolean;
+  showLabel: string;
+  hideLabel: string;
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    aria-label={visible ? hideLabel : showLabel}
+    aria-pressed={visible}
+    onClick={onClick}
+    className="absolute inset-y-0 right-0 grid w-11 place-items-center text-slate-500 transition hover:text-cyan-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+  >
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 fill-none stroke-current stroke-[1.8]">
+      {visible ? <><path d="M3 3l18 18" /><path d="M10.6 10.6a2 2 0 002.8 2.8" /><path d="M9.9 5.2A10.8 10.8 0 0112 5c5.1 0 8.7 4.4 9.7 6.2a1.8 1.8 0 010 1.6 15.3 15.3 0 01-3 3.8" /><path d="M6.3 6.3a15.5 15.5 0 00-4 4.9 1.8 1.8 0 000 1.6C3.3 14.6 6.9 19 12 19c1.1 0 2.2-.2 3.2-.6" /></> : <><path d="M2.3 12.8a1.8 1.8 0 010-1.6C3.3 9.4 6.9 5 12 5s8.7 4.4 9.7 6.2a1.8 1.8 0 010 1.6C20.7 14.6 17.1 19 12 19S3.3 14.6 2.3 12.8z" /><circle cx="12" cy="12" r="3" /></>}
+    </svg>
+  </button>
+);
+
 export const AuthPage = ({
   mode
 }: {
@@ -142,6 +174,8 @@ export const AuthPage = ({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [verificationEmail, setVerificationEmail] = useState<string | null>(
     null
@@ -452,18 +486,26 @@ export const AuthPage = ({
               <>
                 <label className="block text-sm text-slate-300">
                   {text.password}
-                  <input
-                    aria-label={text.password}
-                    required
-                    minLength={mode === "register" ? 12 : 8}
-                    autoComplete={
-                      mode === "register" ? "new-password" : "current-password"
-                    }
-                    type="password"
-                    value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  className="mt-1.5 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none transition focus:border-cyan-300"
-                />
+                  <div className="relative mt-1.5">
+                    <input
+                      aria-label={text.password}
+                      required
+                      minLength={mode === "register" ? 12 : 8}
+                      autoComplete={
+                        mode === "register" ? "new-password" : "current-password"
+                      }
+                      type={passwordVisible ? "text" : "password"}
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      className="w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 pr-12 text-white outline-none transition focus:border-cyan-300"
+                    />
+                    <PasswordVisibilityButton
+                      visible={passwordVisible}
+                      showLabel={text.showPassword}
+                      hideLabel={text.hidePassword}
+                      onClick={() => setPasswordVisible((visible) => !visible)}
+                    />
+                  </div>
                 {mode === "register" ? (
                   <ul className="mt-3 grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
                     {text.passwordRequirements.map((requirement, index) => (
@@ -486,16 +528,24 @@ export const AuthPage = ({
                 {mode === "register" ? (
                   <label className="block text-sm text-slate-300">
                     {text.confirm}
-                  <input
-                    aria-label={text.confirm}
-                    required
-                    minLength={mode === "register" ? 12 : 8}
+                    <div className="relative mt-1.5">
+                      <input
+                        aria-label={text.confirm}
+                        required
+                        minLength={mode === "register" ? 12 : 8}
                       autoComplete="new-password"
-                      type="password"
+                        type={confirmationVisible ? "text" : "password"}
                       value={confirmation}
                       onChange={(event) => setConfirmation(event.target.value)}
-                      className="mt-1.5 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none transition focus:border-cyan-300"
-                    />
+                        className="w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 pr-12 text-white outline-none transition focus:border-cyan-300"
+                      />
+                      <PasswordVisibilityButton
+                        visible={confirmationVisible}
+                        showLabel={text.showConfirmation}
+                        hideLabel={text.hideConfirmation}
+                        onClick={() => setConfirmationVisible((visible) => !visible)}
+                      />
+                    </div>
                   </label>
                 ) : null}
               </>

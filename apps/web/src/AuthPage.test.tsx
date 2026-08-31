@@ -131,6 +131,33 @@ describe("AuthPage", () => {
     expect(screen.queryByRole("button", { name: /Google|Apple/i })).toBeNull();
   });
 
+  it("lets a user reveal and hide their password while signing in", () => {
+    render(<AuthPage mode="login" />);
+
+    const password = screen.getByLabelText("Passwort");
+    expect(password.getAttribute("type")).toBe("password");
+
+    fireEvent.click(screen.getByRole("button", { name: "Passwort anzeigen" }));
+    expect(password.getAttribute("type")).toBe("text");
+
+    fireEvent.click(screen.getByRole("button", { name: "Passwort verbergen" }));
+    expect(password.getAttribute("type")).toBe("password");
+  });
+
+  it("lets a user reveal their registration password and confirmation independently", () => {
+    render(<AuthPage mode="register" />);
+
+    const password = screen.getByLabelText(/^Passwort$/);
+    const confirmation = screen.getByLabelText("Passwort wiederholen");
+
+    fireEvent.click(screen.getByRole("button", { name: "Passwort anzeigen" }));
+    expect(password.getAttribute("type")).toBe("text");
+    expect(confirmation.getAttribute("type")).toBe("password");
+
+    fireEvent.click(screen.getByRole("button", { name: "Passwort wiederholen anzeigen" }));
+    expect(confirmation.getAttribute("type")).toBe("text");
+  });
+
   it("passes the completed CAPTCHA token when registering", async () => {
     render(<AuthPage mode="register" />);
 
