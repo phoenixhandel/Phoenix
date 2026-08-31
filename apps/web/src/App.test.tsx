@@ -51,6 +51,13 @@ describe("Phoenix product access", () => {
     expect(screen.getByRole("heading", { name: /krypto im überblick/i })).toBeTruthy();
   });
 
+  it("does not show the removed funds-and-custody copy on the home page", () => {
+    render(<LandingPage />);
+
+    expect(screen.queryByText(/phoenix akzeptiert keine kundengelder/i)).toBeNull();
+    expect(screen.queryByText(/keine kundengelder · keine verwahrung · keine auszahlungen/i)).toBeNull();
+  });
+
   it("shows official crypto logos beside the supported assets", () => {
     render(<LandingPage />);
 

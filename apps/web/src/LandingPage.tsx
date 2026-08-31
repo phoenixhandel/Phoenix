@@ -36,8 +36,7 @@ const content = {
       ["Portfolioansicht", "Assets, Aktivität und ausgewählte Märkte bleiben an einem klaren Ort verbunden."],
       ["Nachvollziehbare Schritte", "Verifizierung, Einstellungen und Hilfe folgen einer einfachen, nachvollziehbaren Struktur."]
     ],
-    ctaTitle: "Beginnen Sie mit Krypto, nicht mit Komplexität.", ctaCopy: "Erstellen Sie Ihr Konto und bestätigen Sie Ihre E-Mail-Adresse, um Ihren Phoenix Workspace zu öffnen.",
-    note: "Phoenix akzeptiert keine Kundengelder und bietet keine Verwahrung oder Auszahlungen an."
+    ctaTitle: "Beginnen Sie mit Krypto, nicht mit Komplexität.", ctaCopy: "Erstellen Sie Ihr Konto und bestätigen Sie Ihre E-Mail-Adresse, um Ihren Phoenix Workspace zu öffnen."
   },
   en: {
     nav: ["Crypto", "Markets", "Security"], login: "Log in", create: "Open account",
@@ -53,8 +52,7 @@ const content = {
       ["Portfolio view", "Assets, activity, and selected markets stay connected in one clear place."],
       ["Traceable steps", "Verification, settings, and help follow a simple, understandable structure."]
     ],
-    ctaTitle: "Start with crypto, not complexity.", ctaCopy: "Create your account and confirm your email address to enter your Phoenix workspace.",
-    note: "Phoenix does not accept client funds or provide custody or withdrawals."
+    ctaTitle: "Start with crypto, not complexity.", ctaCopy: "Create your account and confirm your email address to enter your Phoenix workspace."
   }
 } as const;
 
@@ -98,6 +96,6 @@ export const LandingPage = () => {
     <section id="security" className="mx-auto max-w-7xl px-5 py-16 sm:px-8"><div className="grid gap-8 lg:grid-cols-[.7fr_1.3fr]"><h2 className="max-w-md text-3xl font-semibold tracking-tight text-white sm:text-4xl">{copy.proofTitle}</h2><div className="grid gap-px border border-[#1e2a40] bg-[#1e2a40] md:grid-cols-3">{copy.proof.map(([title, detail]) => <section key={title} className="bg-[#0d1727] p-6"><span className="block h-1 w-8 bg-cyan-300" /><h3 className="mt-6 text-lg font-semibold text-white">{title}</h3><p className="mt-3 text-sm leading-6 text-slate-400">{detail}</p></section>)}</div></div></section>
 
     <section className="border-t border-[#1e2a40] bg-[#0d1727] px-5 py-14 sm:px-8"><div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 md:flex-row md:items-end"><div><h2 className="max-w-xl text-3xl font-semibold tracking-tight text-white">{copy.ctaTitle}</h2><p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">{copy.ctaCopy}</p></div><a href="/register" className="inline-flex min-h-12 items-center justify-center bg-cyan-300 px-6 text-sm font-bold text-[#07101e] transition hover:bg-cyan-200">{copy.create}</a></div></section>
-    <p className="border-t border-[#1e2a40] bg-[#07101e] px-5 py-4 text-center text-xs leading-5 text-slate-500 sm:px-8">{copy.note}</p><SiteFooter />
+    <SiteFooter />
   </main>;
 };
