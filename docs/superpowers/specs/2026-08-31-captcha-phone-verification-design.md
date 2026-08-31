@@ -2,12 +2,12 @@
 
 ## Goal
 
-Protect password registration, password sign-in, and account-bound phone verification with Cloudflare Turnstile; remove Google and Apple sign-in from the product surface; and make Tier 2 attach a verified phone number to the authenticated Phoenix account instead of performing a separate passwordless phone sign-in.
+Protect password registration and password sign-in with Cloudflare Turnstile; remove Google and Apple sign-in from the product surface; and make Tier 2 attach a verified phone number to the authenticated Phoenix account instead of performing a separate passwordless phone sign-in.
 
 ## Constraints
 
 - Email-confirmed Supabase sessions remain the sole gate for protected Phoenix routes.
-- Turnstile is mandatory in production for registration, password sign-in, and the phone-number send action. A missing public site key prevents submission and gives a configuration error rather than silently bypassing CAPTCHA.
+- Turnstile is mandatory in production for registration and password sign-in. A missing public site key prevents those submissions and gives a configuration error rather than silently bypassing CAPTCHA.
 - The Turnstile secret is configured only in Supabase Auth Bot and Abuse Protection. It is never committed, sent to the API, or exposed in Vite.
 - `VITE_TURNSTILE_SITE_KEY` is public browser configuration and is passed as a Docker build argument.
 - Password reset and email-code resend flows are out of scope for this change.
@@ -20,13 +20,11 @@ Create a small `TurnstileCaptcha` web component that loads Cloudflare's explicit
 
 `AuthPage` renders the component for `register` and `login` modes. The submit button remains disabled until a token exists. `signUp` receives the token through Supabase's CAPTCHA option, and `signInWithPassword` receives the same option. Reset-password mode remains unchanged.
 
-`PhoneVerificationPage` uses the same component only while sending a phone-change code. The confirmation-code submission does not need a new widget token because it verifies the code issued by the prior protected request.
-
 Add `VITE_TURNSTILE_SITE_KEY` to `.env.example`, `.env.production.example`, the production Compose web build arguments, and the Dockerfile build environment. The production key value is provided by the operator; tests supply a deterministic widget double.
 
 ## Account-Bound Phone Verification
 
-Replace `signInWithOtp({ phone })` with `auth.updateUser({ phone }, { captchaToken })`. This sends the verification SMS for the current account's pending phone change. Replace `verifyOtp({ phone, token, type: "sms" })` with `verifyOtp({ phone, token, type: "phone_change" })`.
+Replace `signInWithOtp({ phone })` with `auth.updateUser({ phone })`. This sends the verification SMS for the current account's pending phone change. Replace `verifyOtp({ phone, token, type: "sms" })` with `verifyOtp({ phone, token, type: "phone_change" })`. The installed Supabase client exposes CAPTCHA tokens for password access flows but not authenticated `updateUser`, so no unsupported token is passed to the phone update.
 
 On success, refresh the Supabase session and provision/synchronize the Phoenix application user without changing the authenticated user identity. The Verification page continues to derive Tier 2 completion from `phone_confirmed_at`.
 
