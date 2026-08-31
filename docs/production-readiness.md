@@ -8,6 +8,7 @@
 - Tier 2 is wired to Supabase Phone Login. It becomes active after an SMS provider is configured.
 - Tier 3 is intentionally unavailable. Phoenix does not offer a document upload or identity-review path in this deployment.
 - Phoenix Assist is a site-wide chat widget. With no `OPENAI_API_KEY`, it provides the built-in safe guidance instead of calling an AI provider.
+- The authenticated contact form delivers to `phoenixhandel@protonmail.com` only when `RESEND_API_KEY` and `SUPPORT_FROM_EMAIL` are configured on the API server. The key never belongs in Vite or the browser.
 
 ## Render Blueprint
 

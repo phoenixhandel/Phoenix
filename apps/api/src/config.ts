@@ -16,7 +16,10 @@ const configSchema = z.object({
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
   OPENAI_API_KEY: optionalNonEmptyString,
-  OPENAI_SUPPORT_MODEL: z.string().min(1).default("gpt-5.6")
+  OPENAI_SUPPORT_MODEL: z.string().min(1).default("gpt-5.6"),
+  RESEND_API_KEY: optionalNonEmptyString,
+  SUPPORT_FROM_EMAIL: optionalNonEmptyString,
+  SUPPORT_INBOX_EMAIL: z.string().email().default("phoenixhandel@protonmail.com")
 }).refine((value) => Boolean(value.SUPABASE_URL) === Boolean(value.SUPABASE_ANON_KEY), {
   message: "SUPABASE_URL and SUPABASE_ANON_KEY must be set together"
 });
@@ -33,6 +36,9 @@ export type AppConfig = {
   stripeWebhookSecret?: string | undefined;
   openAiApiKey?: string | undefined;
   openAiSupportModel?: string | undefined;
+  resendApiKey?: string | undefined;
+  supportFromEmail?: string | undefined;
+  supportInboxEmail?: string | undefined;
 };
 
 export const loadConfig = (environment: NodeJS.ProcessEnv): AppConfig => {
@@ -49,6 +55,9 @@ export const loadConfig = (environment: NodeJS.ProcessEnv): AppConfig => {
     stripeSecretKey: parsed.STRIPE_SECRET_KEY,
     stripeWebhookSecret: parsed.STRIPE_WEBHOOK_SECRET,
     openAiApiKey: parsed.OPENAI_API_KEY,
-    openAiSupportModel: parsed.OPENAI_SUPPORT_MODEL
+    openAiSupportModel: parsed.OPENAI_SUPPORT_MODEL,
+    resendApiKey: parsed.RESEND_API_KEY,
+    supportFromEmail: parsed.SUPPORT_FROM_EMAIL,
+    supportInboxEmail: parsed.SUPPORT_INBOX_EMAIL
   };
 };

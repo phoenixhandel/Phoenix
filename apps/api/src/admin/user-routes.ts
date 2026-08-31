@@ -8,7 +8,7 @@ type Dependencies = { auth: AuthProvider; users: UserDirectory; pool: LedgerPool
 type UserRow = { user_id: string; email: string | null; role: string; account_status: string; trading_status: string; kyc_status: string; email_verified: boolean; phone_verified: boolean; created_at: string | Date; updated_at: string | Date; last_login_at: string | Date | null };
 const statuses = z.enum(["ACTIVE", "SUSPENDED", "LOCKED"]);
 const tradingStatuses = z.enum(["ENABLED", "FROZEN"]);
-const changeSchema = z.object({ accountStatus: statuses.optional(), tradingStatus: tradingStatuses.optional(), reason: z.string().trim().min(1).max(2000) });
+const changeSchema = z.object({ accountStatus: statuses.optional(), tradingStatus: tradingStatuses.optional() });
 const pageSchema = z.object({ limit: z.coerce.number().int().min(1).max(100).default(20), cursor: z.coerce.number().int().min(0).default(0), q: z.string().trim().min(1).max(100).optional() });
 const asyncRoute = (handler: RequestHandler): RequestHandler => (request, response, next) => { Promise.resolve(handler(request, response, next)).catch(next); };
 
@@ -88,7 +88,7 @@ export const registerAdminUserRoutes = (app: Express, { auth, users, pool }: Dep
       const result = await client.query<UserRow>(`UPDATE users SET account_status = COALESCE($2::account_status, account_status), trading_status = COALESCE($3::trading_status, trading_status) WHERE user_id = $1 RETURNING ${userSelect}`, [request.params.userId, body.data.accountStatus ?? null, body.data.tradingStatus ?? null]);
       if (!result.rows[0]) { await client.query("ROLLBACK"); response.status(404).json({ error: { code: "USER_NOT_FOUND" } }); return; }
       const action = body.data.accountStatus ? "USER_ACCOUNT_STATUS_CHANGED" : "USER_TRADING_STATUS_CHANGED";
-      await client.query("INSERT INTO admin_audit_events (admin_user_id, target_user_id, action, entity_type, entity_id, metadata, reason) VALUES ($1, $2, $3, 'USER', $2, $4::jsonb, $5)", [administrator.userId, request.params.userId, action, JSON.stringify({ accountStatus: body.data.accountStatus, tradingStatus: body.data.tradingStatus }), body.data.reason]);
+      await client.query("INSERT INTO admin_audit_events (admin_user_id, target_user_id, action, entity_type, entity_id, metadata, reason) VALUES ($1, $2, $3, 'USER', $2, $4::jsonb, 'ADMINISTRATOR_ACTION')", [administrator.userId, request.params.userId, action, JSON.stringify({ accountStatus: body.data.accountStatus, tradingStatus: body.data.tradingStatus })]);
       await client.query("COMMIT");
       response.status(200).json({ user: presentUser(result.rows[0]) });
     } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }

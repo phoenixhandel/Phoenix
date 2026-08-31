@@ -22,6 +22,7 @@ import { registerStripeIdentityWebhook } from "./identity/webhook.js";
 import { registerProvisionRoutes } from "./auth/provision-routes.js";
 import { createRateLimitMiddleware } from "./security/rate-limit.js";
 import { registerSupportRoutes, type SupportResponder } from "./support/routes.js";
+import { registerContactRoutes, type ContactMailSender } from "./support/contact-routes.js";
 import { registerSettingsRoutes } from "./settings/routes.js";
 
 type AppDependencies = {
@@ -31,6 +32,7 @@ type AppDependencies = {
   trading?: Omit<TradingRouteDependencies, "auth" | "users">;
   identity?: IdentityProvider | undefined;
   support?: SupportResponder | undefined;
+  contactMail?: ContactMailSender | undefined;
   stripeWebhook?: { secretKey: string; webhookSecret: string } | undefined;
 };
 
@@ -74,6 +76,7 @@ export const createApp = (config: AppConfig, dependencies?: AppDependencies, mar
 
   if (dependencies) {
     if (dependencies.ledgerPool) registerProvisionRoutes(app, { auth: dependencies.auth, pool: dependencies.ledgerPool });
+    registerContactRoutes(app, { auth: dependencies.auth, users: dependencies.users, mail: dependencies.contactMail });
     app.get("/api/me", createAuthenticationMiddleware(dependencies), (_request, response) => {
       response.status(200).json(response.locals.authenticatedUser);
     });

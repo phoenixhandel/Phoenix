@@ -23,7 +23,7 @@ describe("admin user routes", () => {
     const detail = await request(app).get("/api/admin/users/u1").set(headers);
     expect(detail.status).toBe(200);
     expect(detail.body.user).toEqual(expect.objectContaining({ userId: "u1" }));
-    const update = await request(app).patch("/api/admin/users/u1/status").set(headers).send({ accountStatus: "SUSPENDED", reason: "Review" });
+    const update = await request(app).patch("/api/admin/users/u1/status").set(headers).send({ accountStatus: "SUSPENDED" });
     expect(update.status).toBe(200);
   });
 

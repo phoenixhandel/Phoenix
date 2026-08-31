@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { normalizeTopCoins } from "./market-data";
+import { describe, expect, it, vi } from "vitest";
+import { getPortfolioAssetPrices, normalizeTopCoins } from "./market-data";
 
 describe("normalizeTopCoins", () => {
   it("keeps the market-cap rank, logo, price, and 24-hour move for a discovery row", () => {
@@ -30,5 +30,13 @@ describe("normalizeTopCoins", () => {
         volume24h: 48100000000
       }
     ]);
+  });
+});
+
+describe("portfolio prices", () => {
+  it("returns symbol-indexed prices in the selected display currency", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ bitcoin: { eur: 6000 }, tether: { eur: 0.92 } }) }));
+    await expect(getPortfolioAssetPrices("EUR")).resolves.toEqual({ BTC: 6000, USDT: 0.92 });
+    vi.unstubAllGlobals();
   });
 });

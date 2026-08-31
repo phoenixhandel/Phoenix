@@ -18,7 +18,6 @@ type AuditEventRow = {
   entity_type: string;
   entity_id: string | null;
   metadata: Record<string, unknown>;
-  reason: string | null;
   created_at: string | Date;
 };
 
@@ -44,7 +43,7 @@ export const registerAdminAuditRoutes = (app: Express, dependencies: AdminAuditR
     const client = await dependencies.pool.connect();
     try {
       const result = await client.query<AuditEventRow>(
-        `SELECT event_id, admin_user_id, target_user_id, action, entity_type, entity_id, metadata, reason, created_at
+        `SELECT event_id, admin_user_id, target_user_id, action, entity_type, entity_id, metadata, created_at
          FROM admin_audit_events
          ORDER BY created_at DESC, event_id DESC
          LIMIT $1 OFFSET $2`,
@@ -59,7 +58,6 @@ export const registerAdminAuditRoutes = (app: Express, dependencies: AdminAuditR
           entityType: event.entity_type,
           entityId: event.entity_id,
           metadata: event.metadata,
-          reason: event.reason,
           createdAt: new Date(event.created_at).toISOString()
         })),
         nextCursor: result.rows.length === query.data.limit ? String(query.data.cursor + result.rows.length) : null

@@ -9,6 +9,7 @@ import { executeMarketOrder, type MarketOrderInput } from "./trading/execution-s
 import type { LedgerPool } from "./ledger/credit-service.js";
 import { createStripeIdentityProvider } from "./identity/provider.js";
 import { createOpenAiSupportResponder } from "./support/routes.js";
+import { createResendContactMailSender } from "./support/contact-routes.js";
 
 const config = loadConfig(process.env);
 const pool = new Pool({ connectionString: config.databaseUrl });
@@ -20,6 +21,7 @@ const dependencies = config.supabaseUrl && config.supabaseAnonKey
       ledgerPool: pool as LedgerPool,
       identity: config.stripeSecretKey ? createStripeIdentityProvider(config.stripeSecretKey) : undefined,
       support: config.openAiApiKey ? createOpenAiSupportResponder({ apiKey: config.openAiApiKey, model: config.openAiSupportModel ?? "gpt-5.6" }) : undefined,
+      contactMail: config.resendApiKey && config.supportFromEmail ? createResendContactMailSender({ apiKey: config.resendApiKey, from: config.supportFromEmail, inbox: config.supportInboxEmail ?? "phoenixhandel@protonmail.com" }) : undefined,
       stripeWebhook: config.stripeSecretKey && config.stripeWebhookSecret ? { secretKey: config.stripeSecretKey, webhookSecret: config.stripeWebhookSecret } : undefined,
       trading: {
         requireKycForTrading: config.requireKycForTrading,

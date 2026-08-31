@@ -15,11 +15,10 @@ export type AdminRouteDependencies = {
 
 const creditBody = z.object({
   asset: z.string().trim().regex(/^[A-Z0-9]{2,12}$/),
-  amount: z.string().trim().min(1),
-  reason: z.string().trim().min(1).max(2000)
+  amount: z.string().trim().min(1)
 });
-const setBalanceBody = z.object({ asset: z.string().trim().regex(/^[A-Z0-9]{2,12}$/), newBalance: z.string().trim().min(1), reason: z.string().trim().min(1).max(2000) });
-const resetBody = z.object({ reason: z.string().trim().min(1).max(2000) });
+const setBalanceBody = z.object({ asset: z.string().trim().regex(/^[A-Z0-9]{2,12}$/), newBalance: z.string().trim().min(1) });
+const resetBody = z.object({});
 
 const asyncRoute = (handler: RequestHandler): RequestHandler => (request, response, next) => {
   Promise.resolve(handler(request, response, next)).catch(next);
@@ -49,7 +48,7 @@ export const registerAdminBalanceRoutes = (app: Express, dependencies: AdminRout
         asset: body.data.asset,
         amount: body.data.amount,
         idempotencyKey,
-        notes: body.data.reason
+        notes: "ADMINISTRATOR_ACTION"
       });
 
       response.status(result.idempotent ? 200 : 201).json(result);
@@ -77,7 +76,7 @@ export const registerAdminBalanceRoutes = (app: Express, dependencies: AdminRout
         asset: body.data.asset,
         amount: body.data.amount,
         idempotencyKey,
-        notes: body.data.reason
+        notes: "ADMINISTRATOR_ACTION"
       });
 
       response.status(result.idempotent ? 200 : 201).json(result);
@@ -90,7 +89,7 @@ export const registerAdminBalanceRoutes = (app: Express, dependencies: AdminRout
     const targetUserId = request.params.userId;
     if (!body.success || !idempotencyKey || typeof targetUserId !== "string") { response.status(400).json({ error: { code: "VALIDATION_ERROR" } }); return; }
     const administrator = response.locals.authenticatedUser as PhoenixUser;
-    const result = await executeSetBalance({ pool: dependencies.ledgerPool, actorUserId: administrator.userId, targetUserId, asset: body.data.asset, newBalance: body.data.newBalance, idempotencyKey, notes: body.data.reason });
+    const result = await executeSetBalance({ pool: dependencies.ledgerPool, actorUserId: administrator.userId, targetUserId, asset: body.data.asset, newBalance: body.data.newBalance, idempotencyKey, notes: "ADMINISTRATOR_ACTION" });
     response.status(result.idempotent ? 200 : 201).json(result);
   }));
 
@@ -100,7 +99,7 @@ export const registerAdminBalanceRoutes = (app: Express, dependencies: AdminRout
     const targetUserId = request.params.userId;
     if (!body.success || !idempotencyKey || typeof targetUserId !== "string") { response.status(400).json({ error: { code: "VALIDATION_ERROR" } }); return; }
     const administrator = response.locals.authenticatedUser as PhoenixUser;
-    const result = await executePortfolioReset({ pool: dependencies.ledgerPool, actorUserId: administrator.userId, targetUserId, idempotencyKey, notes: body.data.reason });
+    const result = await executePortfolioReset({ pool: dependencies.ledgerPool, actorUserId: administrator.userId, targetUserId, idempotencyKey, notes: "ADMINISTRATOR_ACTION" });
     response.status(result.idempotent ? 200 : 201).json(result);
   }));
 };

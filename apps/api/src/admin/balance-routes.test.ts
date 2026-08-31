@@ -61,18 +61,18 @@ describe("administrator balance routes", () => {
       .post("/api/admin/users/target-user/balance/credit")
       .set("authorization", "Bearer valid-token")
       .set("idempotency-key", "credit-route-1")
-      .send({ asset: "BTC", amount: "0.25", reason: "Demo credit" });
+      .send({ asset: "BTC", amount: "0.25" });
 
     expect(response.status).toBe(403);
     expect(response.body).toEqual({ error: { code: "ADMIN_REQUIRED" } });
   });
 
-  it("requires a reason and idempotency key for an administrator credit", async () => {
+  it("allows an administrator credit without a client-supplied reason", async () => {
     const response = await request(createApp(config, dependencies("ADMIN")))
       .post("/api/admin/users/target-user/balance/credit")
       .set("authorization", "Bearer valid-token")
       .set("idempotency-key", "credit-route-1")
-      .send({ asset: "BTC", amount: "0.25", reason: "Demo credit" });
+      .send({ asset: "BTC", amount: "0.25" });
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ transactionId: "credit-transaction", idempotent: false });
@@ -83,7 +83,7 @@ describe("administrator balance routes", () => {
       .post("/api/admin/users/target-user/balance/debit")
       .set("authorization", "Bearer valid-token")
       .set("idempotency-key", "debit-route-1")
-      .send({ asset: "BTC", amount: "0.25", reason: "Demo debit" });
+      .send({ asset: "BTC", amount: "0.25" });
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ transactionId: "credit-transaction", idempotent: false });
@@ -94,7 +94,7 @@ describe("administrator balance routes", () => {
       .put("/api/admin/users/target-user/balance")
       .set("authorization", "Bearer valid-token")
       .set("idempotency-key", "set-route-1")
-      .send({ asset: "BTC", newBalance: "1.5", reason: "Correct demo balance" });
+      .send({ asset: "BTC", newBalance: "1.5" });
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ transactionId: "credit-transaction", idempotent: false, delta: "0.500000000000" });
@@ -105,7 +105,7 @@ describe("administrator balance routes", () => {
       .post("/api/admin/users/target-user/portfolio/reset")
       .set("authorization", "Bearer valid-token")
       .set("idempotency-key", "reset-route-1")
-      .send({ reason: "Reset demo portfolio" });
+      .send({});
 
     expect(response.status).toBe(201);
     expect(response.body).toEqual({ transactionId: "credit-transaction", idempotent: false, resetAssets: ["BTC", "USDT"] });

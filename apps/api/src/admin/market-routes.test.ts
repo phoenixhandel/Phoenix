@@ -12,7 +12,7 @@ describe("admin market routes", () => {
     const app = express(); app.use(express.json()); registerAdminMarketRoutes(app, dependencies);
     const headers = { authorization: "Bearer token" };
     expect((await request(app).get("/api/admin/market/config").set(headers)).status).toBe(200);
-    const changed = await request(app).patch("/api/admin/market/config").set(headers).send({ mode: "MANUAL", simulationPaused: true, reason: "Maintenance" });
+    const changed = await request(app).patch("/api/admin/market/config").set(headers).send({ mode: "MANUAL", simulationPaused: true });
     expect(changed.status).toBe(200);
     expect(changed.body.configuration).toEqual(expect.objectContaining({ mode: "REAL" }));
   });

@@ -13,6 +13,14 @@ const stateFor = (session: Session | null): SessionState => {
   return session.user.email_confirmed_at ? "verified" : "unverified";
 };
 
+const syncLegacyAccessToken = (session: Session | null) => {
+  if (session?.access_token) {
+    window.localStorage.setItem("phoenix_access_token", session.access_token);
+  } else {
+    window.localStorage.removeItem("phoenix_access_token");
+  }
+};
+
 export const AuthSessionProvider = ({ children }: { children: ReactNode }) => {
   const auth = getAuthClient();
   const [session, setSession] = useState<Session | null>(null);
@@ -23,12 +31,17 @@ export const AuthSessionProvider = ({ children }: { children: ReactNode }) => {
     let active = true;
     void auth.auth.getSession().then(({ data }) => {
       if (!active) return;
+      syncLegacyAccessToken(data.session);
       setSession(data.session);
       setState(stateFor(data.session));
     }).catch(() => {
-      if (active) setState("anonymous");
+      if (active) {
+        syncLegacyAccessToken(null);
+        setState("anonymous");
+      }
     });
     const { data } = auth.auth.onAuthStateChange((_event, next) => {
+      syncLegacyAccessToken(next);
       setSession(next);
       setState(stateFor(next));
     });

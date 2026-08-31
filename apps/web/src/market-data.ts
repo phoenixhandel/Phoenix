@@ -26,6 +26,13 @@ export type PricePoint = { time: number; price: number };
 export type HistoryRange = "1" | "7" | "30" | "90" | "365" | "max";
 
 const coinGecko = "https://api.coingecko.com/api/v3";
+const portfolioAssets: Record<string, string> = { bitcoin: "BTC", ethereum: "ETH", solana: "SOL", ripple: "XRP", tether: "USDT" };
+
+export const getPortfolioAssetPrices = async (currency: "EUR" | "USD" | "GBP") => {
+  const code = currency.toLowerCase();
+  const data = await readJson<Record<string, Record<string, unknown>>>(`${coinGecko}/simple/price?ids=${Object.keys(portfolioAssets).join(",")}&vs_currencies=${code}`);
+  return Object.fromEntries(Object.entries(portfolioAssets).flatMap(([id, symbol]) => typeof data[id]?.[code] === "number" ? [[symbol, data[id][code] as number]] : []));
+};
 
 export const normalizeTopCoins = (rows: CoinGeckoMarket[]): TopCoin[] =>
   rows

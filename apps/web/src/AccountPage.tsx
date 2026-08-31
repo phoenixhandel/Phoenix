@@ -3,6 +3,7 @@ import { CompanyLogo } from "./CompanyLogo";
 import { getAuthClient } from "./auth-client";
 import { useLanguage } from "./i18n";
 import { passwordIssue } from "./password-policy";
+import { getPortfolioAssetPrices } from "./market-data";
 import { WorkspaceShell } from "./WorkspaceShell";
 
 const apiBase = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -171,6 +172,7 @@ export const AccountPage = ({ page }: { page: Page }) => {
   const [supportSubject, setSupportSubject] = useState("");
   const [supportMessage, setSupportMessage] = useState("");
   const [settingsNotice, setSettingsNotice] = useState<string | null>(null);
+  const [assetPrices, setAssetPrices] = useState<Record<string, number>>({});
   const token = window.localStorage.getItem("phoenix_access_token");
   const route =
     page in endpoints ? endpoints[page as keyof typeof endpoints] : null;
@@ -208,6 +210,19 @@ export const AccountPage = ({ page }: { page: Page }) => {
       active = false;
     };
   }, [route, token]);
+
+  useEffect(() => {
+    if (page !== "settings" || !token) return;
+    void fetch(`${apiBase}/api/me/settings`, { headers: { authorization: `Bearer ${token}` } })
+      .then(async (response) => response.ok ? response.json() as Promise<{ displayCurrency?: "EUR" | "USD" | "GBP" }> : null)
+      .then((settings) => { if (settings?.displayCurrency) setDisplayCurrency(settings.displayCurrency); })
+      .catch(() => undefined);
+  }, [page, token]);
+
+  useEffect(() => {
+    if (page !== "portfolio") return;
+    void getPortfolioAssetPrices(displayCurrency).then(setAssetPrices).catch(() => setAssetPrices({}));
+  }, [displayCurrency, page]);
 
   const balances = (data as BalanceResponse | null)?.balances;
   const trades = (data as TradeResponse | null)?.trades;
@@ -276,7 +291,7 @@ export const AccountPage = ({ page }: { page: Page }) => {
                     </p>
                   </div>
                 </div>
-                <div className="text-right"><p className="font-mono text-sm font-semibold tabular-nums text-white">{fiat.format(0)}</p><p className="mt-1 font-mono text-xs tabular-nums text-slate-500">{value} {asset}</p></div>
+                <div className="text-right"><p className="font-mono text-sm font-semibold tabular-nums text-white">{Number(value) === 0 ? fiat.format(0) : typeof assetPrices[asset] === "number" ? fiat.format(Number(value) * assetPrices[asset]) : "—"}</p><p className="mt-1 font-mono text-xs tabular-nums text-slate-500">{value} {asset}</p></div>
               </div>
             ))}
           </div>

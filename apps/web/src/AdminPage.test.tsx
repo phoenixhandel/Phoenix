@@ -32,13 +32,12 @@ describe("AdminPage", () => {
     expect(screen.getByRole("button", { name: "Apply balance update" })).toBeTruthy();
 
     fireEvent.change(screen.getByLabelText("Amount"), { target: { value: "1.25" } });
-    fireEvent.change(screen.getByPlaceholderText("Why is this adjustment needed?"), { target: { value: "Demonstration balance" } });
     fireEvent.click(screen.getByRole("button", { name: "Apply balance update" }));
 
     await screen.findByText("Balance update recorded in the audit log.");
     expect(fetch).toHaveBeenCalledWith("http://localhost:3001/api/admin/users/user-1/balance", expect.objectContaining({
       method: "PUT",
-      body: JSON.stringify({ asset: "USDT", newBalance: "1.25", reason: "Demonstration balance" })
+      body: JSON.stringify({ asset: "USDT", newBalance: "1.25" })
     }));
   });
 });

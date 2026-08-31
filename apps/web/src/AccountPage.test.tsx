@@ -32,6 +32,7 @@ describe("AccountPage", () => {
     expect(
       await screen.findByText("Bitcoin")
     ).toBeTruthy();
+    expect((await screen.findAllByText(/0,00\s?€/)).length).toBe(5);
     expect(screen.getByRole("button", { name: "Einzahlen" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Konvertieren" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Auszahlen" })).toBeTruthy();
