@@ -35,7 +35,7 @@ describe("AccountPage", () => {
     expect((await screen.findAllByText(/0,00\s?€/)).length).toBe(5);
     expect(screen.getByRole("button", { name: "Einzahlen" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Konvertieren" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Auszahlen" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Auszahlen" }).getAttribute("href")).toBe("/withdraw");
   });
 
   it("keeps the dashboard useful when account data cannot be reached", async () => {

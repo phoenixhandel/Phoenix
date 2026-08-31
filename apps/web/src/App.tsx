@@ -16,6 +16,7 @@ import { VerificationPage } from "./VerificationPage";
 import { InformationPage } from "./InformationPage";
 import { MarketsPage } from "./MarketsPage";
 import { RouteChangeModal } from "./RouteChangeModal";
+import { WithdrawalReviewPage } from "./WithdrawalReviewPage";
 import { LanguageProvider } from "./i18n";
 import { AuthSessionProvider, PublicOnlyRoute, RequireVerifiedSession } from "./auth-session";
 import {
@@ -757,6 +758,7 @@ export const App = () => (
           path="/portfolio"
           element={guarded(<AccountPage page="portfolio" />)}
         />
+        <Route path="/withdraw" element={guarded(<WithdrawalReviewPage />)} />
         <Route
           path="/history"
           element={guarded(<AccountPage page="history" />)}

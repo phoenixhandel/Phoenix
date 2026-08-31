@@ -59,7 +59,6 @@ const content = {
     deposit: "Einzahlen",
     convert: "Konvertieren",
     withdraw: "Auszahlen",
-    withdrawUnavailable: "Auszahlungen sind für dieses Konto derzeit nicht verfügbar.",
     loading: "Portfolio wird geladen…",
     emptyTitle: "Noch keine Assets in deinem Konto.",
     emptyCopy: "Entdecke unterstützte Märkte, sobald du bereit bist.",
@@ -110,7 +109,6 @@ const content = {
     deposit: "Deposit",
     convert: "Convert",
     withdraw: "Withdraw",
-    withdrawUnavailable: "Withdrawals are not available for this account at the moment.",
     loading: "Loading portfolio…",
     emptyTitle: "No assets in your account yet.",
     emptyCopy: "Explore supported markets whenever you are ready.",
@@ -164,7 +162,6 @@ export const AccountPage = ({ page }: { page: Page }) => {
   const [requestState, setRequestState] = useState<
     "loading" | "ready" | "unavailable"
   >("loading");
-  const [walletNotice, setWalletNotice] = useState<string | null>(null);
   const [displayCurrency, setDisplayCurrency] = useState<"EUR" | "USD" | "GBP">("EUR");
   const [newPassword, setNewPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -266,12 +263,11 @@ export const AccountPage = ({ page }: { page: Page }) => {
             <a href="/markets" className="inline-flex min-h-10 items-center bg-cyan-300 px-3 text-sm font-bold text-[#07101e] transition hover:bg-cyan-200">
               {copy.convert}
             </a>
-            <button type="button" onClick={() => setWalletNotice(copy.withdrawUnavailable)} className="min-h-10 border border-[#2a3a54] px-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-white">
+            <a href="/withdraw" className="inline-flex min-h-10 items-center border border-[#2a3a54] px-3 text-sm font-semibold text-slate-200 transition hover:border-cyan-300 hover:text-white">
               {copy.withdraw}
-            </button>
+            </a>
           </div>
         </div>
-        {walletNotice ? <p role="status" className="border-b border-amber-300/20 bg-amber-300/5 px-5 py-3 text-sm text-amber-100">{walletNotice}</p> : null}
         {balanceRows.length ? (
           <div>
             {balanceRows.map(([asset, value]) => (
