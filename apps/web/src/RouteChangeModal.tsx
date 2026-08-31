@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 
+const pendingNoticeKey = "phoenix_route_notice";
+
 // Edit this object to change every part of the route-change notice.
 export const routeChangeModalContent = {
   eyebrow: "PHOENIX",
@@ -15,6 +17,27 @@ export const RouteChangeModal = () => {
   const locationKey = `${location.key}:${location.pathname}${location.search}${location.hash}`;
   const previousLocation = useRef(locationKey);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (window.sessionStorage.getItem(pendingNoticeKey) !== "1") return;
+    window.sessionStorage.removeItem(pendingNoticeKey);
+    setOpen(true);
+  }, []);
+
+  useEffect(() => {
+    const markFullPageNavigation = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a[href]") : null;
+      if (!link || link.target || link.hasAttribute("download")) return;
+      const next = new URL(link.href, window.location.href);
+      const current = new URL(window.location.href);
+      if (next.origin === current.origin && `${next.pathname}${next.search}${next.hash}` !== `${current.pathname}${current.search}${current.hash}`) {
+        window.sessionStorage.setItem(pendingNoticeKey, "1");
+      }
+    };
+    document.addEventListener("click", markFullPageNavigation);
+    return () => document.removeEventListener("click", markFullPageNavigation);
+  }, []);
 
   useEffect(() => {
     if (previousLocation.current === locationKey) return;
