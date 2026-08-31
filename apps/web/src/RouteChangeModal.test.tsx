@@ -37,6 +37,15 @@ describe("RouteChangeModal", () => {
     expect(window.sessionStorage.getItem("phoenix_route_notice")).toBeNull();
   });
 
+  it("renders only the notice image and close control", async () => {
+    window.sessionStorage.setItem("phoenix_route_notice", "1");
+    render(<MemoryRouter initialEntries={["/next"]}><RouteChangeModal /></MemoryRouter>);
+
+    expect(await screen.findByRole("img", { name: "Page transition notice" })).toBeTruthy();
+    expect(screen.queryByRole("heading")).toBeNull();
+    expect(screen.getByRole("button", { name: "Close notice" })).toBeTruthy();
+  });
+
   it("stays hidden for an anonymous visitor after a navigation", async () => {
     mockUseAuthSession.mockReturnValue({ session: null, state: "anonymous" });
     window.sessionStorage.setItem("phoenix_route_notice", "1");
