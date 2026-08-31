@@ -21,11 +21,12 @@ export const RouteChangeModal = () => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (state !== "verified") {
+    if (state === "anonymous" || state === "unverified") {
       window.sessionStorage.removeItem(pendingNoticeKey);
       setOpen(false);
       return;
     }
+    if (state === "pending") return;
     if (window.sessionStorage.getItem(pendingNoticeKey) !== "1") return;
     window.sessionStorage.removeItem(pendingNoticeKey);
     setOpen(true);

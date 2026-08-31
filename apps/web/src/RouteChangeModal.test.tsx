@@ -45,4 +45,16 @@ describe("RouteChangeModal", () => {
 
     expect(screen.queryByRole("dialog")).toBeNull();
   });
+
+  it("opens after a verified session is restored on the destination page", async () => {
+    mockUseAuthSession.mockReturnValue({ session: null, state: "pending" });
+    window.sessionStorage.setItem("phoenix_route_notice", "1");
+    const view = render(<MemoryRouter initialEntries={["/markets"]}><RouteChangeModal /></MemoryRouter>);
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    mockUseAuthSession.mockReturnValue({ session: null, state: "verified" });
+    view.rerender(<MemoryRouter initialEntries={["/markets"]}><RouteChangeModal /></MemoryRouter>);
+
+    expect(await screen.findByRole("dialog")).toBeTruthy();
+  });
 });
