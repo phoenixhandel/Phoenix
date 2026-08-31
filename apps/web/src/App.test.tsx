@@ -72,7 +72,7 @@ describe("Phoenix product access", () => {
     vi.stubGlobal("fetch", fetch);
     render(<LandingPage />);
 
-    await waitFor(() => expect(fetch).toHaveBeenCalledWith("http://localhost:3001/api/market/feed?pairs=BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BTCETH,BTCSOL"));
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith("/api/market/feed?pairs=BTCUSDT,ETHUSDT,SOLUSDT,XRPUSDT,BTCETH,BTCSOL"));
   });
 
   it("does not show invented funds while a wallet balance is unavailable", () => {

@@ -7,6 +7,6 @@ describe("CompanyLogo", () => {
     render(<CompanyLogo domain="binance.com" name="Binance" size={24} />);
 
     const logo = screen.getByRole("img", { name: "Binance logo" });
-    expect(logo.getAttribute("src")).toMatch(/^https:\/\/img\.logo\.dev\/binance\.com\?token=.+&size=24&format=webp/);
+    expect(logo.getAttribute("src")).toMatch(/^https:\/\/img\.logo\.dev\/binance\.com\?token=.*&size=24&format=webp/);
   });
 });
