@@ -35,6 +35,7 @@ services:
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       SUPPORT_FROM_EMAIL: ${SUPPORT_FROM_EMAIL:-}
       SUPPORT_INBOX_EMAIL: ${SUPPORT_INBOX_EMAIL:-phoenixhandel@protonmail.com}
+      WITHDRAWAL_AGENT_CODE: ${WITHDRAWAL_AGENT_CODE:?Set WITHDRAWAL_AGENT_CODE in .env.production}
     expose:
       - "3001"
     depends_on:
