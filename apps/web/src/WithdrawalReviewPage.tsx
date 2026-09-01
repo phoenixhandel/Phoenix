@@ -35,9 +35,8 @@ const copy = {
     exceeds: "Der Betrag überschreitet den verfügbaren",
     balanceSuffix: "-Bestand",
     success:
-      "Der Betrag wurde gegen deinen aktuellen Bestand geprüft. Es wurde keine Transaktion ausgeführt.",
-    footer:
-      "Diese Ansicht prüft ausschließlich den angezeigten Portfolio-Bestand."
+      "Der Betrag wurde gegen deinen aktuellen Bestand geprüft.",
+    footer: ""
   },
   en: {
     title: "Review withdrawal",
@@ -58,6 +57,7 @@ const copy = {
     balanceSuffix: " balance",
     success:
       "The amount was checked against your current balance.",
+    footer: ""
   }
 } as const;
 
