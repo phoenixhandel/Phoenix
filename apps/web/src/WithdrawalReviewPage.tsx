@@ -57,8 +57,7 @@ const copy = {
     exceeds: "The amount exceeds the available",
     balanceSuffix: " balance",
     success:
-      "The amount was checked against your current balance. No transaction was executed.",
-    footer: "This view only checks the displayed portfolio balance."
+      "The amount was checked against your current balance.",
   }
 } as const;
 

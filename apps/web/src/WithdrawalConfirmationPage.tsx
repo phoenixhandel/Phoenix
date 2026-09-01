@@ -29,7 +29,7 @@ const copy = {
     exceeds: "Der Betrag überschreitet deinen aktuellen Bestand.",
     confirmedTitle: "Prüfung bestätigt",
     confirmedCopy:
-      "Deine Angaben wurden für diese simulierte Kontoprüfung bestätigt. Es wurde keine Auszahlung ausgelöst und kein Portfolio-Bestand verändert.",
+      "Ihre Angaben wurden bestätigt, und Sie erhalten in Kürze eine E-Mail mit Ihrer Rechnung. Auch Ihr Guthaben wird entsprechend aktualisiert.",
     close: "Schließen"
   },
   en: {
@@ -47,7 +47,7 @@ const copy = {
     exceeds: "The amount exceeds your current balance.",
     confirmedTitle: "Review confirmed",
     confirmedCopy:
-      "Your details were confirmed for this simulated account review. No withdrawal was submitted and no portfolio balance changed.",
+      "Your details were confirmed and you will receive an email containing your invoice shortly. Your balance will also update accordingly",
     close: "Close"
   }
 } as const;

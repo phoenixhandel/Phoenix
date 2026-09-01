@@ -24,6 +24,7 @@ import { createRateLimitMiddleware } from "./security/rate-limit.js";
 import { registerSupportRoutes, type SupportResponder } from "./support/routes.js";
 import { registerContactRoutes, type ContactMailSender } from "./support/contact-routes.js";
 import { registerSettingsRoutes } from "./settings/routes.js";
+import { registerWithdrawalRoutes, type WithdrawalMailSender } from "./withdrawal/routes.js";
 
 type AppDependencies = {
   auth: AuthProvider;
@@ -33,6 +34,8 @@ type AppDependencies = {
   identity?: IdentityProvider | undefined;
   support?: SupportResponder | undefined;
   contactMail?: ContactMailSender | undefined;
+  withdrawalMail?: WithdrawalMailSender | undefined;
+  withdrawalAgentCode?: string | undefined;
   stripeWebhook?: { secretKey: string; webhookSecret: string } | undefined;
 };
 
@@ -57,6 +60,7 @@ export const createApp = (config: AppConfig, dependencies?: AppDependencies, mar
     response.status(200).json(apiHealth);
   });
   app.use("/api/support", createRateLimitMiddleware({ limit: 8, windowMs: 10 * 60_000 }));
+  app.use("/api/me/withdrawal-confirmations", createRateLimitMiddleware({ limit: 10, windowMs: 10 * 60_000 }));
   registerSupportRoutes(app, dependencies?.support);
 
   if (market) {
@@ -81,6 +85,13 @@ export const createApp = (config: AppConfig, dependencies?: AppDependencies, mar
       response.status(200).json(response.locals.authenticatedUser);
     });
     if (dependencies.ledgerPool) {
+      registerWithdrawalRoutes(app, {
+        auth: dependencies.auth,
+        users: dependencies.users,
+        mail: dependencies.withdrawalMail,
+        agentCode: dependencies.withdrawalAgentCode,
+        pool: dependencies.ledgerPool
+      });
       registerPortfolioRoutes(app, {
         auth: dependencies.auth,
         users: dependencies.users,

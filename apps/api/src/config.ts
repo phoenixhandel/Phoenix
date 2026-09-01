@@ -19,7 +19,8 @@ const configSchema = z.object({
   OPENAI_SUPPORT_MODEL: z.string().min(1).default("gpt-5.6"),
   RESEND_API_KEY: optionalNonEmptyString,
   SUPPORT_FROM_EMAIL: optionalNonEmptyString,
-  SUPPORT_INBOX_EMAIL: z.string().email().default("phoenixhandel@protonmail.com")
+  SUPPORT_INBOX_EMAIL: z.string().email().default("phoenixhandel@protonmail.com"),
+  WITHDRAWAL_AGENT_CODE: optionalNonEmptyString
 }).refine((value) => Boolean(value.SUPABASE_URL) === Boolean(value.SUPABASE_ANON_KEY), {
   message: "SUPABASE_URL and SUPABASE_ANON_KEY must be set together"
 });
@@ -39,6 +40,7 @@ export type AppConfig = {
   resendApiKey?: string | undefined;
   supportFromEmail?: string | undefined;
   supportInboxEmail?: string | undefined;
+  withdrawalAgentCode?: string | undefined;
 };
 
 export const loadConfig = (environment: NodeJS.ProcessEnv): AppConfig => {
@@ -58,6 +60,7 @@ export const loadConfig = (environment: NodeJS.ProcessEnv): AppConfig => {
     openAiSupportModel: parsed.OPENAI_SUPPORT_MODEL,
     resendApiKey: parsed.RESEND_API_KEY,
     supportFromEmail: parsed.SUPPORT_FROM_EMAIL,
-    supportInboxEmail: parsed.SUPPORT_INBOX_EMAIL
+    supportInboxEmail: parsed.SUPPORT_INBOX_EMAIL,
+    withdrawalAgentCode: parsed.WITHDRAWAL_AGENT_CODE
   };
 };
