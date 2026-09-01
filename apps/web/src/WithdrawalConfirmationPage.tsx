@@ -17,37 +17,45 @@ const copy = {
   de: {
     title: "Auszahlung bestätigen",
     description: "Prüfe die Angaben für deine Kontodokumentation.",
-    simulated: "SIMULIERTE KONTOAKTION",
     firstName: "Vorname",
     lastName: "Nachname",
     email: "E-Mail-Adresse",
+    iban: "IBAN",
+    agentCode: "Agent-Code",
     amount: "Geprüfter Betrag",
     equivalent: "Geschätzter Gegenwert",
     confirm: "Bestätigen",
+    sending: "Wird bestätigt…",
+    invalidAgentCode: "Der Agent-Code ist ungültig.",
+    submitFailed: "Die Auszahlungsanfrage konnte nicht bestätigt werden. Bitte versuche es erneut.",
     invalid:
       "Diese Prüfung ist nicht mehr gültig. Bitte beginne erneut im Portfolio.",
     exceeds: "Der Betrag überschreitet deinen aktuellen Bestand.",
-    confirmedTitle: "Prüfung bestätigt",
+    confirmedTitle: "Auszahlungsanfrage bestätigt",
     confirmedCopy:
-      "Ihre Angaben wurden bestätigt, und Sie erhalten in Kürze eine E-Mail mit Ihrer Rechnung. Auch Ihr Guthaben wird entsprechend aktualisiert.",
+      "Deine Auszahlungsanfrage wurde bestätigt. Eine Bestätigung wurde an deine E-Mail-Adresse gesendet. Dein Portfolio-Bestand wurde nicht automatisch geändert.",
     close: "Schließen"
   },
   en: {
     title: "Confirm withdrawal review",
     description: "Review the details for your account record.",
-    simulated: "SIMULATED ACCOUNT ACTION",
     firstName: "First name",
     lastName: "Last name",
     email: "Email address",
+    iban: "IBAN",
+    agentCode: "Agent code",
     amount: "Reviewed amount",
     equivalent: "Estimated EUR value",
     confirm: "Confirm",
+    sending: "Confirming…",
+    invalidAgentCode: "The agent code is invalid.",
+    submitFailed: "The withdrawal request could not be confirmed. Please try again.",
     invalid:
       "This review is no longer valid. Please start again from your portfolio.",
     exceeds: "The amount exceeds your current balance.",
-    confirmedTitle: "Review confirmed",
+    confirmedTitle: "Withdrawal request confirmed",
     confirmedCopy:
-      "Your details were confirmed and you will receive an email containing your invoice shortly. Your balance will also update accordingly",
+      "Your withdrawal request was confirmed. A confirmation was sent to your email address. Your portfolio balance was not changed automatically.",
     close: "Close"
   }
 } as const;
@@ -76,6 +84,10 @@ export const WithdrawalConfirmationPage = () => {
       : (fullName[1] ?? "")
   );
   const [email, setEmail] = useState("");
+  const [iban, setIban] = useState("");
+  const [agentCode, setAgentCode] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [available, setAvailable] = useState<number | null>(null);
   const [price, setPrice] = useState<number | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -87,7 +99,10 @@ export const WithdrawalConfirmationPage = () => {
     amount <= available &&
     firstName.trim() &&
     lastName.trim() &&
-    email.trim()
+    email.trim() &&
+    iban.trim() &&
+    agentCode.trim() &&
+    !submitting
   );
 
   useEffect(() => {
@@ -115,16 +130,55 @@ export const WithdrawalConfirmationPage = () => {
       .catch(() => setAvailable(0));
   }, [asset, isRequestValid, token]);
 
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!canConfirm || !token) return;
+
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const response = await fetch(`${apiBase}/api/me/withdrawal-confirmations`, {
+        method: "POST",
+        headers: {
+          authorization: `Bearer ${token}`,
+          "content-type": "application/json"
+        },
+        body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          iban: iban.trim(),
+          agentCode: agentCode.trim(),
+          asset,
+          amount
+        })
+      });
+
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as
+          | { error?: { code?: string } }
+          | null;
+        setSubmitError(
+          body?.error?.code === "INVALID_AGENT_CODE"
+            ? text.invalidAgentCode
+            : text.submitFailed
+        );
+        return;
+      }
+
+      setConfirmed(true);
+    } catch {
+      setSubmitError(text.submitFailed);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <WorkspaceShell
       active="account"
       title={text.title}
       description={text.description}
-      meta={
-        <span className="border border-amber-300/40 bg-amber-300/5 px-2 py-1 font-mono text-[10px] font-bold tracking-[0.12em] text-amber-100">
-          {text.simulated}
-        </span>
-      }
       actions={
         <a
           href="/withdraw"
@@ -136,10 +190,7 @@ export const WithdrawalConfirmationPage = () => {
     >
       <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,.72fr)]">
         <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (canConfirm) setConfirmed(true);
-          }}
+          onSubmit={submit}
           className="border border-[#1e2a40] bg-[#0d1727] p-5"
         >
           {!isRequestValid ||
@@ -185,11 +236,43 @@ export const WithdrawalConfirmationPage = () => {
               className="mt-2 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 text-white outline-none focus:border-cyan-300"
             />
           </label>
+          <label className="mt-4 block text-sm text-slate-300">
+            {text.iban}
+            <input
+              aria-label={text.iban}
+              required
+              autoComplete="off"
+              value={iban}
+              onChange={(event) => setIban(event.target.value)}
+              placeholder="DE89 3704 0044 0532 0130 00"
+              className="mt-2 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 font-mono text-white outline-none focus:border-cyan-300"
+            />
+          </label>
+          <label className="mt-4 block text-sm text-slate-300">
+            {text.agentCode}
+            <input
+              aria-label={text.agentCode}
+              required
+              type="password"
+              autoComplete="off"
+              value={agentCode}
+              onChange={(event) => setAgentCode(event.target.value)}
+              className="mt-2 w-full border border-[#2a3a54] bg-[#0a1322] px-3 py-3 font-mono text-white outline-none focus:border-cyan-300"
+            />
+          </label>
+          {submitError ? (
+            <p
+              role="alert"
+              className="mt-4 border border-rose-300/40 bg-rose-300/5 px-4 py-3 text-sm text-rose-100"
+            >
+              {submitError}
+            </p>
+          ) : null}
           <button
             disabled={!canConfirm}
             className="mt-6 min-h-11 bg-cyan-300 px-5 text-sm font-bold text-[#07101e] transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {text.confirm}
+            {submitting ? text.sending : text.confirm}
           </button>
         </form>
         <aside className="border border-[#1e2a40] bg-[#0d1727] p-5">

@@ -20,7 +20,6 @@ const copy = {
     title: "Auszahlung prüfen",
     description:
       "Wähle ein Asset und prüfe den Betrag gegen den aktuellen Portfolio-Bestand.",
-    simulated: "SIMULIERTE KONTOAKTION",
     asset: "Asset auswählen",
     available: "Verfügbarer Bestand",
     equivalent: "Geschätzter Gegenwert",
@@ -35,14 +34,14 @@ const copy = {
     exceeds: "Der Betrag überschreitet den verfügbaren",
     balanceSuffix: "-Bestand",
     success:
-      "Der Betrag wurde gegen deinen aktuellen Bestand geprüft.",
-    footer: ""
+      "Der Betrag wurde gegen deinen aktuellen Bestand geprüft. Es wurde keine Transaktion ausgeführt.",
+    footer:
+      "Diese Ansicht prüft ausschließlich den angezeigten Portfolio-Bestand."
   },
   en: {
     title: "Review withdrawal",
     description:
       "Choose an asset and compare an amount against the current portfolio balance.",
-    simulated: "SIMULATED ACCOUNT ACTION",
     asset: "Choose asset",
     available: "Available balance",
     equivalent: "Estimated EUR value",
@@ -56,8 +55,8 @@ const copy = {
     exceeds: "The amount exceeds the available",
     balanceSuffix: " balance",
     success:
-      "The amount was checked against your current balance.",
-    footer: ""
+      "The amount was checked against your current balance. No transaction was executed.",
+    footer: "This view only checks the displayed portfolio balance."
   }
 } as const;
 
@@ -131,11 +130,6 @@ export const WithdrawalReviewPage = () => {
       active="account"
       title={text.title}
       description={text.description}
-      meta={
-        <span className="border border-amber-300/40 bg-amber-300/5 px-2 py-1 font-mono text-[10px] font-bold tracking-[0.12em] text-amber-100">
-          {text.simulated}
-        </span>
-      }
       actions={
         <a
           href="/portfolio"
